@@ -1,5 +1,5 @@
 #!/usr/bin/python
-import Image
+from PIL import Image
 import sys
 
 def getprops():

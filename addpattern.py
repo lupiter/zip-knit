@@ -19,7 +19,7 @@
 
 import sys
 import brother
-import Image
+from PIL import Image
 import array
 
 TheImage = None

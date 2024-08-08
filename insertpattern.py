@@ -19,7 +19,7 @@
 
 import sys
 import brother
-import Image
+import pillow
 import array
 
 # import convenience functions from brother module

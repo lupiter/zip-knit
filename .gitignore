@@ -12,3 +12,6 @@ test-data
 
 # python files
 *.pyc
+
+# virtual env
+venv/*

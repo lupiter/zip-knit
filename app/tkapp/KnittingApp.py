@@ -12,7 +12,7 @@ import tkinter
 import tkinter.filedialog
 import os
 import os.path
-import Image
+from PIL import Image
 import itertools
 
 class KnittingApp(tkinter.Tk):

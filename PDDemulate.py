@@ -38,7 +38,7 @@
 
 # The Knitting machine does not parse the returned hex ascii values
 # unless they are ALL UPPER CASE. Lower case characters a-f appear
-# to parse az zeros.
+# to parse as zeros.
 
 # You will need the (very nice) pySerial module, found here:
 # http://pyserial.wiki.sourceforge.net/pySerial
@@ -184,7 +184,6 @@ class Disk():
         self.numSectors = 80
         self.Sectors = []
         self.filespath = ""
-        ""
         self.lastDatFilePath = None
         # Set up disk Files and internal buffers
 

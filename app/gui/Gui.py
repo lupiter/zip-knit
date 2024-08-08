@@ -1,4 +1,6 @@
-import tkinter
+from tkinter import *
+from tkinter.ttk import *
+from tkinter.ttk import Style
 
 class Gui:
     def initializeMainWindow(self,w):
@@ -21,7 +23,7 @@ class Gui:
 
     def initMainWindow(self, mainWindow):
         self.mainWindow = mainWindow
-        self.mainWindow.title('Knitting pattern uploader')
+        self.mainWindow.title('Zip Knit')
         self.mainWindow.geometry("600x400")
         self.mainWindow.grid()
         self.mainWindow.grid_columnconfigure(1,weight=10)
@@ -29,79 +31,82 @@ class Gui:
         self.mainWindow.resizable(True,True)
         
     def createDeviceWidgets(self):
-        label = tkinter.Label(self.mainWindow, text="Device path (port):")
+        label = Label(self.mainWindow, text="Device path (port):")
         label.grid(column=0, row=self._row, sticky='W')
         
-        entryText = tkinter.StringVar()
-        self.mainWindow.deviceEntry = tkinter.Entry(self.mainWindow, textvariable=entryText)
+        entryText = StringVar()
+        self.mainWindow.deviceEntry = Entry(self.mainWindow, textvariable=entryText)
         self.mainWindow.deviceEntry.grid(column=1,row=self._row,sticky='EW')
         self.mainWindow.deviceEntry.entryText = entryText
         
     def createEmulatorButton(self):
-        caption = tkinter.StringVar()
-        self.emuButton = tkinter.Button(self.mainWindow, textvariable = caption, command = self.mainWindow.emuButtonClicked)
+        caption = StringVar()
+        self.emuButton = Button(self.mainWindow, textvariable = caption, command = self.mainWindow.emuButtonClicked)
         self.emuButton.caption = caption
         self.emuButton.grid(column=2,row=self._row, columnspan=2, sticky='EW')
         self.setEmuButtonStopped()
         
-        but = tkinter.Button(self.mainWindow, text = 'Help...', command = self.mainWindow.helpButtonClicked)
+        but = Button(self.mainWindow, text = 'Help...', command = self.mainWindow.helpButtonClicked)
         but.grid(column=4,row=self._row, sticky='E')
         
     def createDatFileWidgets(self):
-        label = tkinter.Label(self.mainWindow, text="Dat file:")
+        label = Label(self.mainWindow, text="Dat file:")
         label.grid(column=0, row=self._row, sticky='W')
         
-        entryText = tkinter.StringVar()
-        self.mainWindow.datFileEntry = tkinter.Entry(self.mainWindow, textvariable=entryText)
+        entryText = StringVar()
+        self.mainWindow.datFileEntry = Entry(self.mainWindow, textvariable=entryText)
         self.mainWindow.datFileEntry.grid(column=1,row=self._row,sticky='EW')
         self.mainWindow.datFileEntry.entryText = entryText
 
-        self.chooseDatFileButton = tkinter.Button(self.mainWindow, text="...", command = self.mainWindow.chooseDatFileButtonClicked)
+        self.chooseDatFileButton = Button(self.mainWindow, text="...", command = self.mainWindow.chooseDatFileButtonClicked)
         self.chooseDatFileButton.grid(column=2,row=self._row,sticky='W')
 
-        self.reloadDatFileButton = tkinter.Button(self.mainWindow, text="Reload file", command = self.mainWindow.reloadDatFileButtonClicked)
+        self.reloadDatFileButton = Button(self.mainWindow, text="Reload file", command = self.mainWindow.reloadDatFileButtonClicked)
         self.reloadDatFileButton.grid(column=3,row=self._row,sticky='EW')
         
-        but = tkinter.Button(self.mainWindow, text="Store track", command = self.mainWindow.storeTrackButtonClicked)
+        but = Button(self.mainWindow, text="Store track", command = self.mainWindow.storeTrackButtonClicked)
         but.grid(column=4,row=self._row,sticky='EW')
         self.storeTrackButton = but
         
     def createInfoMessagesLabel(self):
-        labelText = tkinter.StringVar()
-        label = tkinter.Label(self.mainWindow, anchor="w",fg="white",bg="blue",textvariable=labelText)
+        labelText = StringVar()
+        style = Style()
+        style.configure("BW.TLabel", foreground="white", background="blue")
+
+        label = Label(self.mainWindow, anchor="w",style="BW.TLabel",textvariable=labelText)
         label.grid(column=0,row=self._row,columnspan=self._maxColumns,sticky='EW')
         label.caption = labelText
         self.mainWindow.infoLabel = label
         
     def createPatternsPanel(self):
-        patternFrame = tkinter.Frame(self.mainWindow)
+        patternFrame = Frame(self.mainWindow)
         patternFrame.grid(column=0, row=self._row, columnspan = self._maxColumns,sticky='EWNS')
         self.mainWindow.grid_rowconfigure(self._row,weight=1)
         patternFrame.grid_columnconfigure(0,weight=0)
         patternFrame.grid_columnconfigure(1,weight=1)
         patternFrame.grid_rowconfigure(1,weight=1)
         
-        listboxFrame = tkinter.Frame(patternFrame)
+        listboxFrame = Frame(patternFrame)
         listboxFrame.grid(column=0, row=0, sticky='EWNS', rowspan=self._maxRows)
-        scrollbar = tkinter.Scrollbar(listboxFrame, orient=tkinter.VERTICAL)
-        listvar = tkinter.StringVar()
-        lb = tkinter.Listbox(listboxFrame, listvariable=listvar, exportselection=0, width=40, yscrollcommand=scrollbar.set)
+        scrollbar = Scrollbar(listboxFrame, orient=VERTICAL)
+        listvar = StringVar()
+        lb = Listbox(listboxFrame, listvariable=listvar, exportselection=0, width=40, yscrollcommand=scrollbar.set)
         scrollbar.config(command=lb.yview)
         lb.items = ListboxVar(lb, listvar)
-        scrollbar.pack(side=tkinter.RIGHT, fill=tkinter.Y)
-        lb.pack(side=tkinter.LEFT, fill=tkinter.BOTH, expand=1)
+        scrollbar.pack(side=RIGHT, fill=Y)
+        lb.pack(side=LEFT, fill=BOTH, expand=1)
         self.mainWindow.patternListBox = lb;
 
-        textvar = tkinter.StringVar()
-        label = tkinter.Label(patternFrame, anchor="w", textvariable = textvar)
+        textvar = StringVar()
+        label = Label(patternFrame, anchor="w", textvariable = textvar)
         label.grid(column=1, row=0, sticky='EW')
         label.caption = textvar
         self.mainWindow.patternTitle = label
         
-        self.insertBitmapButton = tkinter.Button(patternFrame, text="Insert bitmap...", command = self.mainWindow.insertBitmapButtonClicked)
+        self.insertBitmapButton = Button(patternFrame, text="Insert bitmap...", command = self.mainWindow.insertBitmapButtonClicked)
         self.insertBitmapButton.grid(column=2,row=0,sticky='EW')
 
-        self.exportBitmapButton = tkinter.Button(patternFrame, text="Export bitmap...", command = self.mainWindow.exportBitmapButtonClicked)
+        self.exportBitmapButton = Button(patternFrame, text="Export bitmap...", command = self.mainWindow.exportBitmapButtonClicked)
         self.exportBitmapButton.grid(column=3,row=0,sticky='EW')
         
         pc = ExtendedCanvas(patternFrame, bg='white')
@@ -116,7 +121,7 @@ class Gui:
         b = self.emuButton
         b.caption.set("...stop emulator")
         
-class ExtendedCanvas(tkinter.Canvas):
+class ExtendedCanvas(Canvas):
 
     def getWidth(self):
         w = self.winfo_width()
@@ -136,6 +141,6 @@ class ListboxVar:
         self._listbox = listbox
         
     def set(self, list):
-        self._listbox.delete(0, tkinter.END)
+        self._listbox.delete(0, END)
         for item in list:
-            self._listbox.insert(tkinter.END, item)
+            self._listbox.insert(END, item)

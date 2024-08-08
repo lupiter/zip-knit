@@ -7,6 +7,16 @@ This is an attempt to emulate the FB-100 drive. If you're using a knitting machi
 * [img2track](https://daviworks.com/knitting/) works with Brother 900-series knitting machines with a FB-100 port and a special cable
 * [AYAB](http://www.ayab-knitting.com/) is a guts replacement hardware and software solution, particularly targeting those machines with a broken mylar reader
 
+## Start
+
+brew install python-tk
+
+python3 -m venv venv
+source venv/bin/activate
+pip3 install -r requirements.txt
+
+python3 main.py
+
 
 # Prior Art
 

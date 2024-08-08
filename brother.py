@@ -1,12 +1,7 @@
 #!/usr/bin/env python
 
-import sys
 import array
-#import os
-#import os.path
-#import string
 from array import *
-import ctypes
 
 __version__ = '1.0'
 

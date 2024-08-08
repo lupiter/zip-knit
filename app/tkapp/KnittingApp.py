@@ -1,24 +1,24 @@
 ﻿#!/usr/bin/python
 # -*- coding: UTF-8 -*-
 
-from Config import Config
-from Messages import Messages
+from .Config import Config
+from .Messages import Messages
 from app.gui.Gui import Gui
 from PDDemulate import PDDemulator
 from PDDemulate import PDDEmulatorListener
 from dumppattern import PatternDumper
 from insertpattern import PatternInserter
-import Tkinter
-import tkFileDialog
+import tkinter
+import tkinter.filedialog
 import os
 import os.path
 import Image
 import itertools
 
-class KnittingApp(Tkinter.Tk):
+class KnittingApp(tkinter.Tk):
 
     def __init__(self,parent=None):
-        Tkinter.Tk.__init__(self,parent)
+        tkinter.Tk.__init__(self,parent)
         self.parent = parent
         self.initialize()
         #self.startEmulator()
@@ -76,7 +76,7 @@ class KnittingApp(Tkinter.Tk):
                 self.msg.showInfo('PDDemulate Version 1.1 Ready!')
                 self.setEmulatorStarted(True)
                 self.after_idle(self.emulatorLoop)
-            except Exception, e:
+            except Exception as e:
                 self.msg.showError('Ensure that TFDI cable is connected to port ' + port + '\n\nError: ' + str(e))
                 self.setEmulatorStarted(False)
         
@@ -110,9 +110,9 @@ class KnittingApp(Tkinter.Tk):
     def initConfig(self):
         cfg = Config()
         if not hasattr(cfg, "device"):
-            cfg.device = u""
+            cfg.device = ""
         if not hasattr(cfg, "datFile"):
-            cfg.datFile = u""
+            cfg.datFile = ""
         if not hasattr(cfg, "simulateEmulator"):
             cfg.simulateEmulator = False
         self.config = cfg
@@ -197,7 +197,7 @@ class KnittingApp(Tkinter.Tk):
         self.storeTrack()
 
     def chooseDatFileButtonClicked(self):
-        filePath = tkFileDialog.askopenfilename(filetypes=[('DAT file', '*.dat')], initialfile=self.datFileEntry.entryText.get(),
+        filePath = tkinter.filedialog.askopenfilename(filetypes=[('DAT file', '*.dat')], initialfile=self.datFileEntry.entryText.get(),
             title='Choose dat file with patterns...')
         if len(filePath) > 0:
             self.msg.showInfo('Opened dat file ' + filePath)
@@ -265,7 +265,7 @@ class KnittingApp(Tkinter.Tk):
         self._printPatternBody(pattern, marginx, marginy, bitWidth, bitHeight)
         secCoordbig, secCoordsmall, secCoord2 = 0, marginy / 2, marginy
         step, bigStep = 5, 10
-        for i in xrange(0, max(patternWidth, patternHeight)+1, step):
+        for i in range(0, max(patternWidth, patternHeight)+1, step):
             secCoord = secCoordbig if i % bigStep == 0 else secCoordsmall
             if i < patternWidth:
                 xCoord = marginx + i * bitWidth
@@ -278,8 +278,8 @@ class KnittingApp(Tkinter.Tk):
         patternHeight = len(pattern)
         patternWidth = len(pattern[0])
         self.patternCanvas.clear()
-        for row in xrange(patternHeight):
-            for stitch in xrange(patternWidth):
+        for row in range(patternHeight):
+            for stitch in range(patternWidth):
                 if (pattern[row][stitch]) == 1:
                     fill='black'
                     border='white'
@@ -317,7 +317,7 @@ class KnittingApp(Tkinter.Tk):
             return
         index = int(sel[0])
         pattern = self.patterns[index]
-        filePath = tkFileDialog.askopenfilename(filetypes=[('2-color Bitmap', '*.bmp')],
+        filePath = tkinter.filedialog.askopenfilename(filetypes=[('2-color Bitmap', '*.bmp')],
             title='Choose bitmap file to insert...')
         if len(filePath) > 0:
             self.insertBitmap(filePath, pattern["number"])
@@ -329,7 +329,7 @@ class KnittingApp(Tkinter.Tk):
             return
         index = int(sel[0])
         pattern = self.patterns[index]
-        filePath = tkFileDialog.asksaveasfilename(filetypes=[('2-color Bitmap', '*.bmp')],
+        filePath = tkinter.filedialog.asksaveasfilename(filetypes=[('2-color Bitmap', '*.bmp')],
             title='Save as a bitmap file...')
         if len(filePath) > 0:
             patternNumber = pattern['number']
@@ -339,8 +339,8 @@ class KnittingApp(Tkinter.Tk):
             patternHeight = len(pattern)
             patternWidth = len(pattern[0])
             img = Image.new('RGB', (patternWidth, patternHeight), None)
-            for x in xrange(patternWidth):
-                for y in xrange(patternHeight):
+            for x in range(patternWidth):
+                for y in range(patternHeight):
                     color = (0,0,0) if pattern[patternHeight - y - 1][x] == 1 else (255,255,255)
                     img.putpixel((x,y), color)
             img = img.convert('1')

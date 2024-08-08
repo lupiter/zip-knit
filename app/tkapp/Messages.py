@@ -1,4 +1,4 @@
-import tkMessageBox as mb
+import tkinter.messagebox as mb
 import sys
 
 class Messages:
@@ -16,18 +16,18 @@ class Messages:
     def showMoreInfo(self, msg):
         if self.displayMessages:
             self.clear()
-            print msg
+            print(msg)
             mb.showinfo('Info:',str(msg))
         
     def showInfo(self, msg):
         if self.displayMessages:
             self.clear()
-            print msg
+            print(msg)
             self.app.infoLabel.caption.set('Info: ' + str(msg))
         
     def showDebug(self, msg):
         if self.debug:
-            print "DEBUG:", msg
+            print("DEBUG:", msg)
 
     def clear(self):
         if self.displayMessages:

@@ -27,7 +27,7 @@ import sys
 #from array import *
 
 if len(sys.argv) < 2:
-    print 'Usage: %s basedir' % sys.argv[0]
+    print('Usage: %s basedir' % sys.argv[0])
     sys.exit()
 
 f = []
@@ -47,22 +47,22 @@ for idx in range(10):
 # Now dump to a csv
 
 # Header row
-print 'Address, Notes',
+print('Address, Notes', end=' ')
 for fnum in range(len(f)):
-    print ', file-%02d' % (fnum+1),
-print ""
+    print(', file-%02d' % (fnum+1), end=' ')
+print("")
 
 # Spare rows
-print ','
-print ','
-print ','
+print(',')
+print(',')
+print(',')
 
 
 
 # data rows
 for i in range(2048):
-    print '0x%04X,' % i,
+    print('0x%04X,' % i, end=' ')
     # Add comment fields here
     for fnum in range(len(f)):
-        print ', 0x%02X' % ord(d[fnum][i]),
-    print ""
+        print(', 0x%02X' % ord(d[fnum][i]), end=' ')
+    print("")

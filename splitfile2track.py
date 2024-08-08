@@ -4,8 +4,8 @@ import sys
 
 
 if len(sys.argv) != 2:
-    print 'Usage: %s file.dat' % sys.argv[0]
-    print 'Splits a 2K file.dat file into two 1K track files track0.dat and track1.dat'
+    print('Usage: %s file.dat' % sys.argv[0])
+    print('Splits a 2K file.dat file into two 1K track files track0.dat and track1.dat')
     sys.exit()
 
 

@@ -61,7 +61,7 @@ def bytesForMemo(rows):
 version = '1.0'
 
 
-print "I dont work, sorry!"
+print("I dont work, sorry!")
 sys.exit()
 
 imgfile = sys.argv[2]
@@ -76,12 +76,12 @@ patternbank = 100
 for i in range(99):
     bytenum = i*7
     if (bf.getIndexedByte(bytenum) != 0x1):
-        print "first unused pattern bank #", i
+        print("first unused pattern bank #", i)
         patternbank = i
         break
 
 if (patternbank == 100):
-    print "sorry, no free banks!"
+    print("sorry, no free banks!")
     exit
 
 # ok got a bank, now lets figure out how big this thing we want to insert is
@@ -90,9 +90,9 @@ TheImage.load()
 
 im_size = TheImage.size
 width = im_size[0]
-print "width:",width
+print("width:",width)
 height = im_size[1]
-print "height:", height
+print("height:", height)
 
 # debugging stuff here
 x = 0
@@ -110,7 +110,7 @@ while x > 0:
     if x == 0: #did we hit the end of the line?
         y = y+1
         x = width - 1
-        print " "
+        print(" ")
         if y == height:
             break
 # debugging stuff done
@@ -133,7 +133,7 @@ for pat in pats:
 progentry.append(int(patternnum / 100) & 0xF)
 progentry.append( (int((patternnum % 100)/10) << 4) | (int(patternnum % 10) & 0xF) )
 
-print "Program entry: ",map(hex, progentry)
+print("Program entry: ",list(map(hex, progentry)))
 
 # now to make the actual, yknow memo+pattern data
 
@@ -166,22 +166,22 @@ for r in range(height):
             if (row[s*4 + nibs]):
                 n |= 1 << nibs
         pattmemnibs.append(n)
-        print hex(n),
-    print
+        print(hex(n), end=' ')
+    print()
 
 
 if (len(pattmemnibs) % 2):
     # odd nibbles, buffer to a byte
     pattmemnibs.append(0x0)
 
-print len(pattmemnibs), "nibbles of data"
+print(len(pattmemnibs), "nibbles of data")
 
 # turn into bytes
 pattmem = []
 for i in range (len(pattmemnibs) / 2):
     pattmem.append( pattmemnibs[i*2] | (pattmemnibs[i*2 + 1] << 4))
 
-print map(hex, pattmem)
+print(list(map(hex, pattmem)))
 # whew. 
 
 
@@ -200,13 +200,13 @@ endaddr = 0x6df
 
 for p in pats:
     endaddr =  min(p['pattend'], endaddr)
-print "top address = ", hex(endaddr)
+print("top address = ", hex(endaddr))
 
 beginaddr = endaddr - bytesForMemo(height) - len(pattmem) -1
-print "end will be at ", hex(beginaddr)
+print("end will be at ", hex(beginaddr))
 
 if beginaddr <= 0x2B8:
-    print "sorry, this will collide with the pattern entry data!"
+    print("sorry, this will collide with the pattern entry data!")
     exit
 
 # write the memo and pattern entry from the -end- to the -beginning- (up!)

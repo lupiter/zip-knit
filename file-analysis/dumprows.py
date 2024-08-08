@@ -23,9 +23,9 @@ import brother
 version = '1.0'
 
 if len(sys.argv) < 2:
-    print 'Usage: %s file [start] [end]' % sys.argv[0]
-    print 'Dumps both rows of needle data from brother data files'
-    print 'Optional start and end needle numbers, default to 1 and 200'
+    print('Usage: %s file [start] [end]' % sys.argv[0])
+    print('Dumps both rows of needle data from brother data files')
+    print('Optional start and end needle numbers, default to 1 and 200')
     sys.exit()
 
 leftend = 0
@@ -42,18 +42,18 @@ bf = brother.brotherFile(sys.argv[1])
 currentrow = bf.currentRow()
 nextrow = bf.nextRow()
 
-print '   Next:',
+print('   Next:', end=' ')
 for stitch in nextrow[leftend:rightend]:
     if(stitch) == 0:
-        print ' ',
+        print(' ', end=' ')
     else:
-        print '*',
-print
-print 'Current:',
+        print('*', end=' ')
+print()
+print('Current:', end=' ')
 for stitch in currentrow[leftend:rightend]:
     if(stitch) == 0:
-        print ' ',
+        print(' ', end=' ')
     else:
-        print '*',
-print
+        print('*', end=' ')
+print()
 

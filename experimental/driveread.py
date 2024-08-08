@@ -29,18 +29,18 @@ from FDif import PDD1, dump
 # meat and potatos here
 
 if len(sys.argv) < 3:
-    print 'Usage: %s serialdevice dirname' % sys.argv[0]
-    print
-    print 'Reads all sectors and sector IDs from a disk and'
-    print 'copies it into the directory specified.'
-    print 'The format is the same as PDDemulate uses.'
+    print('Usage: %s serialdevice dirname' % sys.argv[0])
+    print()
+    print('Reads all sectors and sector IDs from a disk and')
+    print('copies it into the directory specified.')
+    print('The format is the same as PDDemulate uses.')
     sys.exit()
 
 
 bdir = os.path.relpath(sys.argv[2])
-print "bdir = ", bdir
+print("bdir = ", bdir)
 if os.path.exists(bdir):
-    print "<%s> already exists, exiting . . ." % bdir
+    print("<%s> already exists, exiting . . ." % bdir)
     sys.exit()
 
 os.mkdir(bdir)
@@ -56,13 +56,13 @@ for sn in range(80):
     Fdata = open(os.path.join(bdir, dfn), 'w')
 
     sid = drive.FDCreadIdSection(psn = '%d' % sn)
-    print "Sector %02d ID: " % sn
-    print dump(sid)
+    print("Sector %02d ID: " % sn)
+    print(dump(sid))
     Fid.write(sid)
 
     data = drive.FDCreadSector(psn = '%d' % sn)
-    print "Sector %02d Data: " % sn
-    print dump(data)
+    print("Sector %02d Data: " % sn)
+    print(dump(data))
     Fdata.write(data)
 
     Fid.close()

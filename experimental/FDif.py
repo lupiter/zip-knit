@@ -28,7 +28,7 @@ FILTER=''.join([(len(repr(chr(x)))==3) and chr(x) or '.' for x in range(256)])
 
 def dump(src, length=16):
     result=[]
-    for i in xrange(0, len(src), length):
+    for i in range(0, len(src), length):
        s = src[i:i+length]
        hexa = ' '.join(["%02X"%ord(x) for x in s])
        printable = s.translate(FILTER)
@@ -49,7 +49,7 @@ class PDD1():
     def open(self, cport='/dev/ttyUSB0', rate = 9600, par = 'N', stpbts=1, tmout=None, xx=0):
         self.ser = serial.Serial(port = cport, baudrate = rate, parity = par, stopbits = stpbts, timeout = tmout, xonxoff=0, rtscts=1, dsrdtr=0)
         if self.ser == None:
-            print 'Unable to open serial device %s' % cport
+            print('Unable to open serial device %s' % cport)
             raise IOError
         self.commtimeout = tmout
         # Sometimes on powerup there are some characters in the buffer, purge them
@@ -67,7 +67,7 @@ class PDD1():
         while self.ser.inWaiting():
             inc = self.ser.read()
             if len(inc) != 0:
-                print 'flushed 0x%02X (%d)' % (ord(inc), num)
+                print('flushed 0x%02X (%d)' % (ord(inc), num))
                 num = num + 1
             else:
                 break
@@ -79,18 +79,18 @@ class PDD1():
 
     def isSuccess(self, FDCstatus):
         if self.verbose:
-            print "isSuccess checking:"
-            print dump(FDCstatus)
+            print("isSuccess checking:")
+            print(dump(FDCstatus))
             if (FDCstatus[0] == '0') and (FDCstatus[1] == '0'):
-                print "  SUCCESS"
-                print "  Physical Sector = %c%c" % (FDCstatus[2], FDCstatus[3])
-                print "  Logical Sector  = %c%c%c%c" %  (FDCstatus[4], FDCstatus[5],FDCstatus[6], FDCstatus[7])
+                print("  SUCCESS")
+                print("  Physical Sector = %c%c" % (FDCstatus[2], FDCstatus[3]))
+                print("  Logical Sector  = %c%c%c%c" %  (FDCstatus[4], FDCstatus[5],FDCstatus[6], FDCstatus[7]))
             else:
-                print "  ***** ERROR ***** : %c%c" %  (FDCstatus[0], FDCstatus[1])
-                print "  Physical Sector = %c%c" % (FDCstatus[2], FDCstatus[3])
-                print "  Logical Sector  = %c%c%c%c" %  (FDCstatus[4], FDCstatus[5],FDCstatus[6], FDCstatus[7])
+                print("  ***** ERROR ***** : %c%c" %  (FDCstatus[0], FDCstatus[1]))
+                print("  Physical Sector = %c%c" % (FDCstatus[2], FDCstatus[3]))
+                print("  Logical Sector  = %c%c%c%c" %  (FDCstatus[4], FDCstatus[5],FDCstatus[6], FDCstatus[7]))
         if len(FDCstatus) != 8:
-            print "Status Bad Len"
+            print("Status Bad Len")
             return False
         for sb in FDCstatus[0:2]:
             if sb != '0':
@@ -133,7 +133,7 @@ class PDD1():
     def __FDCcommandResponse(self, command, expected):
         if self.verbose:
             pcmd = command.strip()
-            print '-------------------------------------\nwriting FDC command ===> <%s>' % pcmd
+            print('-------------------------------------\nwriting FDC command ===> <%s>' % pcmd)
         self.dumpchars()
         self.writebytes(command)
         response = self.getFDCresponse(expected)
@@ -150,13 +150,13 @@ class PDD1():
         else:
             command = "ZZ" + chr(0x08) + chr(0) + chr(0xF7) + "\r"
         if self.verbose:
-            print "Entering FDC Mode, sending:"
-            print dump(command),
+            print("Entering FDC Mode, sending:")
+            print(dump(command), end=' ')
         self.writebytes(command)
         # There's no response to this command, so allow time to complete
         time.sleep(.010)
         if self.verbose:
-            print "Done entering FDC Mode\n"
+            print("Done entering FDC Mode\n")
         return
 
     #
@@ -185,7 +185,7 @@ class PDD1():
             # 30 - Normal
             # 45 - Door open or no disk
             # 32 - write protected
-            print "third byte = 0x%X" % ord(result[2])
+            print("third byte = 0x%X" % ord(result[2]))
         return result
 
     def FDCformat(self, sectorSize='5', verify=True):
@@ -208,16 +208,16 @@ class PDD1():
         the ID, which should be 12 bytes long
         """
         if self.verbose:
-            print "FDCreadIdSection: Enter"
+            print("FDCreadIdSection: Enter")
         command = "A " + psn + "\r"
         result = self.__FDCcommandResponse(command, 8)
         if not self.isSuccess(result):
             raise IOError
         result =  self.__FDCcommandResponse("\r", 12)
         if self.verbose:
-            print "FDCreadIdSection data:"
-            print dump(result)
-            print "FDCreadIdSection: Exit"
+            print("FDCreadIdSection data:")
+            print(dump(result))
+            print("FDCreadIdSection: Exit")
         return result
 
     def FDCreadSector(self, psn = '0', lsn = '1'):
@@ -228,18 +228,18 @@ class PDD1():
         to the max for the physical sector size
         """
         if self.verbose:
-            print "FDCreadSector: Enter"
+            print("FDCreadSector: Enter")
         command = "R " + psn + ","+ lsn + "\r"
         result = self.__FDCcommandResponse(command, 8)
         if not self.isSuccess(result):
             raise IOError
         if self.verbose:
-            print "FDCreadSector: Phase two"
+            print("FDCreadSector: Phase two")
         result =  self.__FDCcommandResponse("\r", 1024)
         if self.verbose:
-            print "FDCreadSector data:"
-            print dump(result)
-            print "FDCreadSector: Exit"
+            print("FDCreadSector data:")
+            print(dump(result))
+            print("FDCreadSector: Exit")
         return result
 
     def FDCsearchIdSection(self, data, psn = '0'):
@@ -251,20 +251,20 @@ class PDD1():
         if len(data) != 12:
             raise ValueError("ID data must be 12 characters long")
         if self.verbose:
-            print "FDCsearchIdSection: Enter"
+            print("FDCsearchIdSection: Enter")
         command = "S" + psn + "\r"
         result = self.__FDCcommandResponse(command, 8)
         if not self.isSuccess(result):
             raise IOError
         if self.verbose:
-            print "FDCsearchIdSection data:"
-            print dump(data)
+            print("FDCsearchIdSection data:")
+            print(dump(data))
         result =  self.__FDCcommandResponse(data, 12)
         if self.verbose:
-            print "FDCsearchIdSection: Exit"
-        print "NOT SURE WHAT WE EXPECT HERE"
-        print "FDCsearchIdSection status is:"
-        print dump(result)
+            print("FDCsearchIdSection: Exit")
+        print("NOT SURE WHAT WE EXPECT HERE")
+        print("FDCsearchIdSection status is:")
+        print(dump(result))
         if not self.isSuccess(result):
             raise IOError
         return
@@ -282,17 +282,17 @@ class PDD1():
         else:
             command = "C"
         if self.verbose:
-            print "FDCwriteIdSection: Enter"
+            print("FDCwriteIdSection: Enter")
         command = command + psn + "\r"
         result = self.__FDCcommandResponse(command, 8)
         if not self.isSuccess(result):
             raise IOError
         if self.verbose:
-            print "FDCwriteIdSection data:"
-            print dump(data)
+            print("FDCwriteIdSection data:")
+            print(dump(data))
         result =  self.__FDCcommandResponse(data, 8)
         if self.verbose:
-            print "FDCwriteIdSection: Exit"
+            print("FDCwriteIdSection: Exit")
         if not self.isSuccess(result):
             raise IOError
         return
@@ -312,17 +312,17 @@ class PDD1():
         else:
             command = "X"
         if self.verbose:
-            print "FDCwriteSector: Enter"
+            print("FDCwriteSector: Enter")
         command = command + psn + "," + lsn + "\r"
         result = self.__FDCcommandResponse(command, 8)
         if not self.isSuccess(result):
             raise IOError
         if self.verbose:
-            print "FDCwriteSector data:"
-            print dump(data)
+            print("FDCwriteSector data:")
+            print(dump(data))
         result =  self.__FDCcommandResponse(data, 8)
         if self.verbose:
-            print "FDCwriteSector: Exit"
+            print("FDCwriteSector: Exit")
         if not self.isSuccess(result):
             raise IOError
         return

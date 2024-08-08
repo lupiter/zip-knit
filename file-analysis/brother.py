@@ -102,13 +102,13 @@ class brotherFile(object):
                     # for now, read only
                     self.df = open(filename, 'w')
             except:
-                print('Unable to open brother file <%s>' % filename)
+                print(('Unable to open brother file <%s>' % filename))
                 raise
             try:
                 self.data = self.df.read(2048)
                 self.df.close()
             except:
-                print('Unable to read 2048 bytes from file <%s>' % filename)
+                print(('Unable to read 2048 bytes from file <%s>' % filename))
                 raise
             self.dfn = filename
         else:
@@ -211,7 +211,7 @@ class brotherFile(object):
         for pi in range(1, 100):
             flag = ord(self.data[idx])
             if self.verbose:
-                print('Entry %d, flag is 0x%02X' % (pi, flag))
+                print(('Entry %d, flag is 0x%02X' % (pi, flag)))
             idx = idx + 1
             unknown = ord(self.data[idx])
             idx = idx + 1
@@ -230,8 +230,8 @@ class brotherFile(object):
             patno = hto(ph,pt,po)
             # we have this entry
             if self.verbose:
-                print('   Pattern %3d: %3d Rows, %3d Stitches - ' % (patno, rows, stitches))
-                print('Unk = %d, Unknown = 0x%02X (%d)' % (unk, unknown, unknown))
+                print(('   Pattern %3d: %3d Rows, %3d Stitches - ' % (patno, rows, stitches)))
+                print(('Unk = %d, Unknown = 0x%02X (%d)' % (unk, unknown, unknown)))
             if flag == 1:
                 # valid entry
                 memoff = pptr
@@ -341,7 +341,7 @@ class brotherFile(object):
         freebottom = (numpats + 2) * patternDirSize
         freespace = freetop - freebottom
         if (self.verbose):
-            print('freetop = 0x%04X, freebottom = 0x%0xX, free = 0x%04X' % (freetop, freebottom, freespace))
+            print(('freetop = 0x%04X, freebottom = 0x%0xX, free = 0x%04X' % (freetop, freebottom, freespace)))
         return freespace
 
     def deletePattern(self, patternNumber):

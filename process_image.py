@@ -9,9 +9,9 @@ def getprops():
     im_file.load()
     im_size = im_file.size
     width = im_size[0]
-    print("width:",width)
+    print(("width:",width))
     height = im_size[1]
-    print("height:", height)
+    print(("height:", height))
     x = width - 1
     while x > 0:
         value = im_file.getpixel((x,y))

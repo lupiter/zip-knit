@@ -23,7 +23,7 @@
 
 import sys
 if len(sys.argv) < 3:
-    print('Usage: %s fileA fileB' % sys.argv[0])
+    print(('Usage: %s fileA fileB' % sys.argv[0]))
     sys.exit()
 
 f1 = open(sys.argv[1])
@@ -38,7 +38,7 @@ for i in range(len(d1)):
         if not inrun:
             print('--')
             inrun = True
-        print('%04X: %02X %02X | %03d %03d' % (i, ord(d1[i]), ord(d2[i]), ord(d1[i]), ord(d2[i])))
+        print(('%04X: %02X %02X | %03d %03d' % (i, ord(d1[i]), ord(d2[i]), ord(d1[i]), ord(d2[i]))))
     else:
         inrun = False
 

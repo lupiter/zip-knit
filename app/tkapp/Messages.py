@@ -27,7 +27,7 @@ class Messages:
         
     def showDebug(self, msg):
         if self.debug:
-            print("DEBUG:", msg)
+            print(("DEBUG:", msg))
 
     def clear(self):
         if self.displayMessages:

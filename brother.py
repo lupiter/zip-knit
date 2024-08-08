@@ -105,7 +105,7 @@ class brotherFile(object):
                 raise
                 #self.df = open(fn, 'w')
         except:
-            print('Unable to open brother file <%s>' % fn)
+            print(('Unable to open brother file <%s>' % fn))
             raise
         try:
             if methodWithPointers:
@@ -117,9 +117,9 @@ class brotherFile(object):
                 raise Exception()
         except:
             if methodWithPointers:
-                print('Unable to read 2048 bytes from file <%s>' % fn)
+                print(('Unable to read 2048 bytes from file <%s>' % fn))
             else:
-                print('Unable to read data from file <%s>' % fn)
+                print(('Unable to read data from file <%s>' % fn))
             raise
         self.dfn = fn
         return
@@ -138,7 +138,7 @@ class brotherFile(object):
         dataarray.fromstring(self.data)
 
         if self.verbose:
-            print("* writing ", hex(b), "to", hex(index))
+            print(("* writing ", hex(b), "to", hex(index)))
         #print dataarray
 
         # this is the actual edit
@@ -202,7 +202,7 @@ class brotherFile(object):
         for pi in range(1, 100):
             flag = ord(self.data[idx])
             if self.verbose:
-                print('Entry %d, flag is 0x%02X' % (pi, flag))
+                print(('Entry %d, flag is 0x%02X' % (pi, flag)))
             idx = idx + 1
             unknown = ord(self.data[idx])
             idx = idx + 1
@@ -221,20 +221,20 @@ class brotherFile(object):
             patno = hto(ph,pt,po)
             # we have this entry
             if self.verbose:
-                print('   Pattern %3d: %3d Rows, %3d Stitches - ' % (patno, rows, stitches))
+                print(('   Pattern %3d: %3d Rows, %3d Stitches - ' % (patno, rows, stitches)))
             if flag != 0:
                 # valid entry
                 if methodWithPointers:
                     pptr =  len(self.data) -1 - ((flag << 8) + unknown) 
                 memoff = pptr
                 if self.verbose:
-                    print("Memo #",patno, "offset ", memoff)
+                    print(("Memo #",patno, "offset ", memoff))
                 patoff = pptr - bytesForMemo(rows)
                 if self.verbose:
-                     print("Pattern #",patno, "offset ", patoff)
+                     print(("Pattern #",patno, "offset ", patoff))
                 pptr = pptr - bytesPerPatternAndMemo(stitches, rows)
                 if self.verbose:
-                     print("Ending offset ", hex(pptr))
+                     print(("Ending offset ", hex(pptr)))
                 if patternNumber:
                     if patternNumber == patno:
                         patlist.append({'number':patno, 'stitches':stitches, 'rows':rows, 'memo':memoff, 'pattern':patoff, 'pattend':pptr})

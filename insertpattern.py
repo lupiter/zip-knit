@@ -194,15 +194,15 @@ class PatternNotFoundException(InserterException):
 
 if __name__ == "__main__":
     if len(sys.argv) < 5:
-        print('Usage: %s oldbrotherfile pattern# image.bmp newbrotherfile' % sys.argv[0])
+        print(('Usage: %s oldbrotherfile pattern# image.bmp newbrotherfile' % sys.argv[0]))
         sys.exit()
     inserter = PatternInserter()
     argv = sys.argv
     try:
         inserter.insertPattern(argv[1],argv[2],argv[3],argv[4])
     except PatternNotFoundException as e:
-        print('ERROR: Pattern %d not found' % e.patternNumber)
+        print(('ERROR: Pattern %d not found' % e.patternNumber))
         sys.exit(1)
     except InserterException as e:
-        print('ERROR: ',e.getMessage())
+        print(('ERROR: ',e.getMessage()))
         sys.exit(1)

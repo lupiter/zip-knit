@@ -47,12 +47,12 @@ def dumpPattern(pat):
                 bits.append('*')
             else:
                 bits.append(' ')
-    print("".join(bits))
+    print(("".join(bits)))
     return
 
 
 if len(sys.argv) < 3:
-    print('Usage: %s fileA fileB' % sys.argv[0])
+    print(('Usage: %s fileA fileB' % sys.argv[0]))
     sys.exit()
 
 f1 = open(sys.argv[1])
@@ -78,7 +78,7 @@ fmt += '208B'
 #lead, pattern1, dummy, pattern2, tail = struct.unpack(fmt, d1)
 #lead[1766], pattern1[13], dummy[22], pattern2[13], tail[208] = unpack(fmt, d1)
 foo = unpack(fmt, d1)
-print(len(foo))
+print((len(foo)))
 #bar = foo[0:1766]
 baz = foo[1766:1779]
 dumpPattern(baz)

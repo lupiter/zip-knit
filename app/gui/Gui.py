@@ -119,11 +119,11 @@ class Gui:
         
     def setEmuButtonStopped(self) -> None:
         b = self.emuButton
-        b.caption.set("Start emulator...")
+        b.caption.set("Start emulator")
         
     def setEmuButtonStarted(self) -> None:
         b = self.emuButton
-        b.caption.set("...stop emulator")
+        b.caption.set("Stop emulator")
         
 class ExtendedCanvas(Canvas):
 

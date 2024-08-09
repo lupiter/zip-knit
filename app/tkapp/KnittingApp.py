@@ -72,7 +72,7 @@ class KnittingApp(tkinter.Tk):
             try:
                 port = self.getConfig().device
                 self.emu.open(cport=port)
-                self.msg.showInfo('PDDemulate Version 1.1 Ready!')
+                self.msg.showInfo('Emulation ready!')
                 self.setEmulatorStarted(True)
                 self.after_idle(self.emulatorLoop)
             except Exception as e:

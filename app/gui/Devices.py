@@ -23,7 +23,7 @@ class Devices:
     pass
 
   def get(self) -> ListPortInfo:
-    name = self.dropdown.get()
+    name = self.label.get()
     for option in self.options:
       if option.name == name:
         return option.device

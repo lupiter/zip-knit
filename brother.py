@@ -182,7 +182,7 @@ class brotherFile(object):
             if self.verbose:
                 print(('Entry %d, flag is 0x%02X' % (pi, flag)))
             idx = idx + 1
-            unknown = ord(self.data[idx])
+            unknown = ord(self.data[idx]) # is this the mode? or track? mode 1 disk has two tracks, mode 2 disk has 40 tracks
             idx = idx + 1
             rh, rt = nibbles(self.data[idx])
             idx = idx + 1
@@ -190,7 +190,7 @@ class brotherFile(object):
             idx = idx + 1
             st, so = nibbles(self.data[idx])
             idx = idx + 1
-            unk, ph = nibbles(self.data[idx])
+            unk, ph = nibbles(self.data[idx]) # is unk here page number?
             idx = idx + 1
             pt, po = nibbles(self.data[idx])
             idx = idx + 1

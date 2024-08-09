@@ -2,8 +2,10 @@ from tkinter import *
 from tkinter.ttk import *
 from tkinter.ttk import Style
 
+from app.gui import Devices
+
 class Gui:
-    def initializeMainWindow(self,w):
+    def initializeMainWindow(self,w) -> None:
         self.initMainWindow(w)
 
         self._maxColumns = 1000
@@ -21,25 +23,27 @@ class Gui:
         self._row += 1
         self.createInfoMessagesLabel()
 
-    def initMainWindow(self, mainWindow):
+    def initMainWindow(self, mainWindow) -> None:
         self.mainWindow = mainWindow
         self.mainWindow.title('Zip Knit')
-        self.mainWindow.geometry("600x400")
+        self.mainWindow.geometry("800x600")
         self.mainWindow.grid()
         self.mainWindow.grid_columnconfigure(1,weight=10)
         self.mainWindow.grid_columnconfigure(2,weight=1)
         self.mainWindow.resizable(True,True)
         
-    def createDeviceWidgets(self):
-        label = Label(self.mainWindow, text="Device path (port):")
-        label.grid(column=0, row=self._row, sticky='W')
+    def createDeviceWidgets(self) -> None:
+        label = Label(self.mainWindow, text="Device:")
+        label.grid(column=0, row=self._row, sticky='E', pady=5, padx=5)
+
+        self.mainWindow.deviceEntry = Devices.Devices(self.mainWindow, self._row, 1)
         
-        entryText = StringVar()
-        self.mainWindow.deviceEntry = Entry(self.mainWindow, textvariable=entryText)
-        self.mainWindow.deviceEntry.grid(column=1,row=self._row,sticky='EW')
-        self.mainWindow.deviceEntry.entryText = entryText
+        # entryText = StringVar()
+        # self.mainWindow.deviceEntry = Entry(self.mainWindow, textvariable=entryText)
+        # self.mainWindow.deviceEntry.grid(column=1,row=self._row,sticky='EW')
+        # self.mainWindow.deviceEntry.entryText = entryText
         
-    def createEmulatorButton(self):
+    def createEmulatorButton(self) -> None:
         caption = StringVar()
         self.emuButton = Button(self.mainWindow, textvariable = caption, command = self.mainWindow.emuButtonClicked)
         self.emuButton.caption = caption
@@ -47,11 +51,11 @@ class Gui:
         self.setEmuButtonStopped()
         
         but = Button(self.mainWindow, text = 'Help...', command = self.mainWindow.helpButtonClicked)
-        but.grid(column=4,row=self._row, sticky='E')
+        but.grid(column=4,row=self._row, sticky='E', padx=5, pady=5)
         
-    def createDatFileWidgets(self):
+    def createDatFileWidgets(self) -> None:
         label = Label(self.mainWindow, text="Dat file:")
-        label.grid(column=0, row=self._row, sticky='W')
+        label.grid(column=0, row=self._row, sticky='E', padx=5)
         
         entryText = StringVar()
         self.mainWindow.datFileEntry = Entry(self.mainWindow, textvariable=entryText)
@@ -65,10 +69,10 @@ class Gui:
         self.reloadDatFileButton.grid(column=3,row=self._row,sticky='EW')
         
         but = Button(self.mainWindow, text="Store track", command = self.mainWindow.storeTrackButtonClicked)
-        but.grid(column=4,row=self._row,sticky='EW')
+        but.grid(column=4,row=self._row,sticky='EW', padx=5)
         self.storeTrackButton = but
         
-    def createInfoMessagesLabel(self):
+    def createInfoMessagesLabel(self) -> None:
         labelText = StringVar()
         style = Style()
         style.configure("BW.TLabel", foreground="white", background="blue")
@@ -78,7 +82,7 @@ class Gui:
         label.caption = labelText
         self.mainWindow.infoLabel = label
         
-    def createPatternsPanel(self):
+    def createPatternsPanel(self) -> None:
         patternFrame = Frame(self.mainWindow)
         patternFrame.grid(column=0, row=self._row, columnspan = self._maxColumns,sticky='EWNS')
         self.mainWindow.grid_rowconfigure(self._row,weight=1)
@@ -113,34 +117,34 @@ class Gui:
         pc.grid(column=1, row=1, sticky='EWNS', columnspan=3)
         self.mainWindow.patternCanvas = pc
         
-    def setEmuButtonStopped(self):
+    def setEmuButtonStopped(self) -> None:
         b = self.emuButton
         b.caption.set("Start emulator...")
         
-    def setEmuButtonStarted(self):
+    def setEmuButtonStarted(self) -> None:
         b = self.emuButton
         b.caption.set("...stop emulator")
         
 class ExtendedCanvas(Canvas):
 
-    def getWidth(self):
+    def getWidth(self) -> int:
         w = self.winfo_width()
         return w
         
-    def getHeight(self):
+    def getHeight(self) -> int:
         h = self.winfo_height()
         return h
         
-    def clear(self):
+    def clear(self) -> None:
         maxsize = 10000
         self.create_rectangle(0,0,maxsize, maxsize, width=0, fill=self.cget('bg'))
         
 class ListboxVar:
-    def __init__(self, listbox, stringvar):
+    def __init__(self, listbox, stringvar) -> None:
         self._stringvar = stringvar
         self._listbox = listbox
         
-    def set(self, list):
+    def set(self, list) -> None:
         self._listbox.delete(0, END)
         for item in list:
             self._listbox.insert(END, item)

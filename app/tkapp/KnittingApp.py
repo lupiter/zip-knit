@@ -13,17 +13,16 @@ import tkinter.filedialog
 import os
 import os.path
 from PIL import Image
-import itertools
 
 class KnittingApp(tkinter.Tk):
 
-    def __init__(self,parent=None):
+    def __init__(self,parent=None) -> None:
         tkinter.Tk.__init__(self,parent)
         self.parent = parent
         self.initialize()
         #self.startEmulator()
         
-    def initialize(self):
+    def initialize(self) -> None:
         self.msg = Messages(self)
         self.patterns = []
         self.pattern = None
@@ -37,33 +36,33 @@ class KnittingApp(tkinter.Tk):
         self.updatePatternCanvasLastSize()
         self.patternListBox.bind('<<ListboxSelect>>', self.patternSelected)
         self.after_idle(self.canvasConfigured)
-        self.deviceEntry.entryText.set(self.getConfig().device)
+        self.deviceEntry.set(self.getConfig().device)
         self.datFileEntry.entryText.set(self.getConfig().datFile)
 
         self.initEmulator()
         self.after_idle(self.reloadPatternFile)
         
-    def initializeUtilities(self):
+    def initializeUtilities(self) -> None:
         self.patternDumper = PatternDumper()
         self.patternDumper.printInfoCallback = self.msg.showInfo
         self.patternInserter = PatternInserter()
         self.patternInserter.printInfoCallback = self.msg.showInfo
         self.patternInserter.printErrorCallback = self.msg.showError
         
-    def initEmulator(self):
+    def initEmulator(self) -> None:
         self.emu = PDDemulator(self.getConfig().imgdir)
         self.emu.listeners.append(PDDListener(self))
         #self.emu = lambda: 1
         self.setEmulatorStarted(False)
     
-    def emuButtonClicked(self):
-        self.getConfig().device = self.deviceEntry.entryText.get()
+    def emuButtonClicked(self) -> None:
+        self.getConfig().device = self.deviceEntry.get()
         if self.emu.started:
             self.stopEmulator()
         else:
             self.startEmulator()
         
-    def startEmulator(self):
+    def startEmulator(self) -> None:
         self.msg.showInfo('Preparing emulator. . . Please Wait')
 
         if self.getConfig().simulateEmulator:
@@ -80,34 +79,34 @@ class KnittingApp(tkinter.Tk):
                 self.msg.showError('Ensure that TFDI cable is connected to port ' + port + '\n\nError: ' + str(e))
                 self.setEmulatorStarted(False)
         
-    def emulatorLoop(self):
+    def emulatorLoop(self) -> None:
         if self.emu.started:
             self.emu.handleRequest(False)
             # repeated call to after_idle() caused all window dialogs to hang out application, using after() each 10 milliseconds
             self.after(100,self.emulatorLoop)
         
-    def stopEmulator(self):
+    def stopEmulator(self) -> None:
         if self.emu is not None:
             self.emu.close()
             self.msg.showInfo('PDDemulate stopped.')
             self.setEmulatorStarted(False)
         self.initEmulator()
         
-    def quitApplication(self):
+    def quitApplication(self) -> None:
         self.stopEmulator()
         self.after_idle(self.quit)
         
-    def setEmulatorStarted(self, started):
+    def setEmulatorStarted(self, started) -> None:
         self.emu.started = started
         if started:
             self.gui.setEmuButtonStarted()
         else:
             self.gui.setEmuButtonStopped()
     
-    def getConfig(self):
+    def getConfig(self) -> Config:
         return self.config
     
-    def initConfig(self):
+    def initConfig(self) -> None:
         cfg = Config()
         if not hasattr(cfg, "device"):
             cfg.device = ""
@@ -117,7 +116,7 @@ class KnittingApp(tkinter.Tk):
             cfg.simulateEmulator = False
         self.config = cfg
         
-    def reloadPatternFile(self, pathToFile = None):
+    def reloadPatternFile(self, pathToFile = None) -> None:
         if not pathToFile:
             pathToFile = self.datFileEntry.entryText.get()
         else:
@@ -138,7 +137,7 @@ class KnittingApp(tkinter.Tk):
         except IOError as e:
             self.msg.showError('Could not open pattern file %s' % pathToFile + '\n' + str(e))
             
-    def storeTrack(self, pathToFile = None):
+    def storeTrack(self, pathToFile = None) -> None:
         if not pathToFile:
             pathToFile = self.datFileEntry.entryText.get()
         self.msg.showInfo('Storing tracks for file ' + pathToFile)
@@ -180,7 +179,7 @@ class KnittingApp(tkinter.Tk):
             if startEmu:
                 self.startEmulator()
         
-    def helpButtonClicked(self):
+    def helpButtonClicked(self) -> None:
         helpMsg = '''Commands to execute on Knitting machine:
 
 552: Download patterns from machine to computer
@@ -190,20 +189,20 @@ class KnittingApp(tkinter.Tk):
 '''
         self.msg.showMoreInfo(helpMsg)
 
-    def reloadDatFileButtonClicked(self):
+    def reloadDatFileButtonClicked(self) -> None:
         self.reloadPatternFile()
         
-    def storeTrackButtonClicked(self):
+    def storeTrackButtonClicked(self) -> None:
         self.storeTrack()
 
-    def chooseDatFileButtonClicked(self):
+    def chooseDatFileButtonClicked(self) -> None:
         filePath = tkinter.filedialog.askopenfilename(filetypes=[('DAT file', '*.dat')], initialfile=self.datFileEntry.entryText.get(),
             title='Choose dat file with patterns...')
         if len(filePath) > 0:
             self.msg.showInfo('Opened dat file ' + filePath)
             self.reloadPatternFile(filePath)
         
-    def patternSelected(self, evt):
+    def patternSelected(self, evt) -> None:
         w = evt.widget
         index = self.getSelectedPatternIndex()
         if index is not None:
@@ -212,14 +211,14 @@ class KnittingApp(tkinter.Tk):
             pattern = None
         self.displayPattern(pattern)
         
-    def getSelectedPatternIndex(self):
+    def getSelectedPatternIndex(self) -> int | None:
         sel = self.patternListBox.curselection()
         if len(sel) > 0:
             return int(sel[0])
         else:
             return None
             
-    def setSelectedPatternIndex(self, index):
+    def setSelectedPatternIndex(self, index) -> None:
         lb = self.patternListBox
         if index is None:
             index = 0
@@ -231,7 +230,7 @@ class KnittingApp(tkinter.Tk):
         self.patternListBox.selection_set(index)
         self.displayPattern(self.patterns[index])
         
-    def displayPattern(self, pattern=None):
+    def displayPattern(self, pattern=None) -> None:
         if not pattern:
             pattern = self.pattern
         self.patternCanvas.clear()
@@ -241,14 +240,14 @@ class KnittingApp(tkinter.Tk):
             self.printPatternOnCanvas(result.pattern)
         self.pattern = pattern
         
-    def getPatternTitle(self, pattern):
+    def getPatternTitle(self, pattern) -> str:
         p = pattern
         if p:
             return 'Pattern no: ' + str(p['number']) + " (rows x stitches: " + str(p["rows"]) + " x " + str(p["stitches"]) + ")" 
         else:
             return 'No pattern'
     
-    def printPatternOnCanvas(self, pattern):
+    def printPatternOnCanvas(self, pattern) -> None:
 #        pattern = []
 #        for x in range(8):
 #            row = []
@@ -274,7 +273,7 @@ class KnittingApp(tkinter.Tk):
                 yCoord = marginx + i * bitHeight
                 self.patternCanvas.create_line(secCoord, yCoord, secCoord2, yCoord)
 
-    def _printPatternBody(self, pattern, patternPosx, patternPosy, bitWidth, bitHeight):
+    def _printPatternBody(self, pattern, patternPosx, patternPosy, bitWidth, bitHeight) -> None:
         patternHeight = len(pattern)
         patternWidth = len(pattern[0])
         self.patternCanvas.clear()
@@ -298,11 +297,11 @@ class KnittingApp(tkinter.Tk):
         
 
         
-    def updatePatternCanvasLastSize(self):
+    def updatePatternCanvasLastSize(self) -> None:
         self.patternCanvas.lastWidth = self.patternCanvas.getWidth()
         self.patternCanvas.lastHeight = self.patternCanvas.getHeight()
                     
-    def canvasConfigured(self):
+    def canvasConfigured(self) -> None:
         if self.patternCanvas.lastWidth != self.patternCanvas.getWidth() or self.patternCanvas.lastHeight != self.patternCanvas.getHeight():
             self.msg.displayMessages = False
             self.updatePatternCanvasLastSize()
@@ -310,7 +309,7 @@ class KnittingApp(tkinter.Tk):
             self.msg.displayMessages = True
         self.after(100, self.canvasConfigured)
     
-    def insertBitmapButtonClicked(self):
+    def insertBitmapButtonClicked(self) -> None:
         sel = self.patternListBox.curselection()
         if len(sel) == 0:
             self.msg.showError('Target pattern for insertion must be selected!')
@@ -322,7 +321,7 @@ class KnittingApp(tkinter.Tk):
         if len(filePath) > 0:
             self.insertBitmap(filePath, pattern["number"])
 
-    def exportBitmapButtonClicked(self):
+    def exportBitmapButtonClicked(self) -> None:
         sel = self.patternListBox.curselection()
         if len(sel) == 0:
             self.msg.showError('Target pattern for saving must be selected!')
@@ -356,10 +355,10 @@ class KnittingApp(tkinter.Tk):
 
 class PDDListener(PDDEmulatorListener):
 
-    def __init__(self, app):
+    def __init__(self, app) -> None:
         self.app = app
 
-    def dataReceived(self, fullFilePath):
+    def dataReceived(self, fullFilePath) -> None:
         self.app.reloadPatternFile(fullFilePath)
     
     

@@ -1,6 +1,7 @@
 ﻿import os
 
 class Config:
+
     def __init__(self):
         self.imgdir = "img";
         if os.sys.platform == 'win32':

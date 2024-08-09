@@ -7,6 +7,22 @@ This is an attempt to emulate the FB-100 drive. If you're using a knitting machi
 * [img2track](https://daviworks.com/knitting/) works with Brother 900-series knitting machines with a FB-100 port and a special cable
 * [AYAB](http://www.ayab-knitting.com/) is a guts replacement hardware and software solution, particularly targeting those machines with a broken mylar reader
 
+## Goals
+
+To be able to:
+
+1. Talk to a KH-970
+2. Read the "floppy" format produced by "formatting"
+3. Read the "floppy" data produced by saving the CB-1 stored patterns
+4. Replace/modify patterns
+5. Replace/modify garments
+6. Create new pattersn and garments
+7. Create new disks
+
+### Status
+
+Pre-step 1: tyding up the project and modernising the code.
+
 ## Start
 
 brew install python-tk

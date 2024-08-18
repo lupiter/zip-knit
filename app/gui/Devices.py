@@ -23,7 +23,7 @@ class Devices:
         self.dropdown.grid(row=row, column=column, stick="EW")
 
     def scan(self):
-        pass
+        self.options = [port for port in serial.tools.list_ports.comports()]
 
     def get(self) -> ListPortInfo:
         name = self.label.get()

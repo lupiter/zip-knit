@@ -394,8 +394,8 @@ class PDDemulator:
         cksum = ord(chkbit)
 
         if cksum == sum:
-            if self.verbose:
-                print(f"Checksum match! {req} {chkbit}")
+            # if self.verbose:
+            #     print(f"Checksum match! {req} {chkbit}")
             return buff
         else:
             if self.verbose:

@@ -165,23 +165,23 @@ class DiskSector:
     def getSectorId(self) -> bytes:
         return self.id
 
-    def setSectorId(self, newid: bytes):
-        if len(newid) != self.idSz:
+    def setSectorId(self, newid: bytes) -> None:
+        if len(newid) == 0:
+            self.id = b"".join([bytes([0]) for num in range(self.idSz)])
+        elif len(newid) != self.idSz:
             print(
-                "Error, bad id length of %d bytes when expecting %d"
-                % (len(newid), self.id)
+                f"Error, bad id {newid} length of {len(newid)} bytes when expecting {self.id}"
             )
             raise IOError
-        self.id = newid
+        else:
+            self.id = newid
         self.writeIdFile()
         print("Wrote New ID: ", end=" ")
         self.dumpId()
         return
 
     def dumpId(self):
-        for i in self.id:
-            print("%02X " % ord(i), end=" ")
-        print()
+        print(f"{self.id}")
 
 
 class Disk:
@@ -330,11 +330,13 @@ class PDDemulator:
                 break
         return
 
-    def readsomechars(self, num):
+    def readsomechars(self, num) -> bytes:
         sch = self.ser.read(num)
+        while len(sch) < num:
+            sch += self.ser.read(num - len(sch))
         return sch
 
-    def readchar(self):
+    def readchar(self) -> bytes:
         inc = ""
         while len(inc) == 0:
             inc = self.ser.read()
@@ -462,7 +464,7 @@ class PDDemulator:
         #   In the case of an S, C, or M command -- or an F command that ends in
         #   an error -- the bytes contain '0000'
         #
-        print("hi cathy", cmd)
+        print("Handling command", cmd)
 
         if cmd == b"\r":
             self.writebytes(b"00000000")
@@ -518,7 +520,14 @@ class PDDemulator:
             print("Format complete, replying")
 
             # But this is probably more correct
-            self.writebytes(b"00000000")
+            if cmd == b"G":
+                self.writebytes(b"00000000")
+            else:
+                self.writebytes(b"000000FF")
+
+            more = self.readchar()
+            if more:
+                self.handleFDCmodeRequest(more)
 
             # After a format, we always start out with OPMode again
             self.FDCmode = False
@@ -620,7 +629,7 @@ class PDDemulator:
             # for data to be written, then after write, send status again
             info = self.readFDDRequest()
             psn, lsn = self.getPsnLsn(info)
-            print("FDC Write ID section %d" % psn)
+            print(f"FDC Write ID section {psn}, lsn {lsn}")
 
             self.writebytes(b"00" + b"%02X" % psn + b"0000")
 
@@ -634,6 +643,10 @@ class PDDemulator:
                 raise
 
             self.writebytes(b"00" + b"%02X" % psn + b"0000")
+
+            more = self.readchar()
+            if more:
+                self.handleFDCmodeRequest(more)
 
         elif cmd == b"W" or cmd == b"X":
             info = self.readFDDRequest()
@@ -657,7 +670,7 @@ class PDDemulator:
             self.writebytes(b"00" + b"%02X" % psn + b"0000")
 
         else:
-            print("Unknown FDC command <0x02%X> received : " % ord(cmd) + cmd)
+            print(f"Unknown FDC command {cmd} received")
 
         # return to Operational Mode
         return

@@ -6,6 +6,9 @@
 # the brother uses a LS size of 1024 bytes, so only one can fit.
 #
 
+import os
+
+
 class DiskSector:
     def __init__(self, fn):
         self.sectorSz = 1024

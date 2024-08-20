@@ -27,7 +27,7 @@ I should find somewhere to archive the saved binary data for future use.
 
 ## Start
 
-```python
+```bash
 brew install python-tk
 
 python3 -m venv venv

@@ -11,9 +11,9 @@ This is an attempt to emulate the FB-100 drive. If you're using a knitting machi
 
 To be able to:
 
-1. Talk to a KH-970
-2. Read the "floppy" format produced by "formatting"
-3. Read the "floppy" data produced by saving the CB-1 stored patterns
+1. Talk to a KH-970 ✅
+2. Read the "floppy" format produced by "formatting" ✅
+3. Read the "floppy" data produced by saving the CB-1 stored patterns 
 4. Replace/modify patterns
 5. Replace/modify garments
 6. Create new pattersn and garments
@@ -21,10 +21,13 @@ To be able to:
 
 ### Status
 
-Pre-step 1: tyding up the project and modernising the code.
+Step 3: It can kind of read the data, but is very confused by the format of what I've saved so far which is just garment shapes.
+
+I should find somewhere to archive the saved binary data for future use.
 
 ## Start
 
+```python
 brew install python-tk
 
 python3 -m venv venv
@@ -32,6 +35,7 @@ source venv/bin/activate
 pip3 install -r requirements.txt
 
 python3 main.py
+```
 
 
 # Prior Art
@@ -40,6 +44,6 @@ This is a fork of https://github.com/adafruit/knitting_machine and maintains the
 
 The work that Steve Conklin did was based on earlier work by John R. Hogerhuis.
 
-This extended by Becky and Limor and others, including Travis Goodspeed:
+This was extended by Becky and Limor and others, including Travis Goodspeed:
 
 http://travisgoodspeed.blogspot.com/2010/12/hacking-knitting-machines-keypad.html

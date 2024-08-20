@@ -1,17 +1,15 @@
 from array import * # type: ignore
-import serial
 
 from PDDemulate.Disk import Disk
 from PDDemulate.Listener import PDDEmulatorListener
+from PDDemulate.Serial import SerialConnection
 
 
 class PDDemulator:
+    serial: SerialConnection
 
-    def __init__(self, basename):
+    def __init__(self, basename, verbose=True):
         self.listeners = list[PDDEmulatorListener]  # list of PDDEmulatorListener
-        self.verbose = True
-        self.noserial = False
-        self.ser: serial.Serial
         self.disk = Disk(basename)
         self.FDCmode = False
         # bytes per logical sector
@@ -26,68 +24,19 @@ class PDDemulator:
             b"6": 1280,
         }
         return
-
-    def __del__(self):
-        return
-
+    
     def open(self, cport="/dev/ttyUSB0") -> None:
-        print('trying to open port: ', cport)
-        if self.noserial is False:
-            self.ser = serial.Serial(
-                port=cport,
-                baudrate=9600,
-                parity=serial.PARITY_NONE,
-                stopbits=serial.STOPBITS_ONE,
-                timeout=False,
-                xonxoff=False,
-                rtscts=False,
-                dsrdtr=False,
-            )
-            #            self.ser.setRTS(True)
-            if self.ser == None:
-                print("Unable to open serial device %s" % cport)
-                raise IOError
-        return
+        self.serial = SerialConnection(cport)
 
     def close(self) -> None:
-        if self.noserial is not False:
-            if self.ser:
-                self.ser.close()
-        return
+        self.serial = None
 
-    def dumpchars(self) -> None:
-        num = 1
-        while 1:
-            inc = self.ser.read()
-            if len(inc) != 0:
-                print("flushed 0x%02X (%d)" % (ord(inc), num))
-                num = num + 1
-            else:
-                break
-        return
-
-    def readsomechars(self, num: int) -> bytes:
-        sch = self.ser.read(num)
-        while len(sch) < num:
-            sch += self.ser.read(num - len(sch))
-        return sch
-
-    def readchar(self) -> bytes:
-        inc = ""
-        while len(inc) == 0:
-            inc = self.ser.read()
-        return inc
-
-    def writebytes(self, b: bytes) -> None:
-        self.ser.write(b)
-        return
-
-    def readFDDRequest(self) -> list[bytes]:
+    def __readFDDRequest(self) -> list[bytes]:
         inbuf = []
         # read through a carriage return
         # parameters are seperated by commas
         while True:
-            inc = self.readchar()
+            inc = self.serial.readchar()
             if inc == b"\r":
                 break
             elif inc == b" ":
@@ -99,26 +48,16 @@ class PDDemulator:
         rv = all.split(b",")
         return rv
 
-    def getPsnLsn(self, info: list[bytes]) -> tuple[int, int]:
-        psn = 0
-        lsn = 1
-        if len(info) >= 1 and info[0] != b"":
-            val = int(info[0])
-            if psn <= 79:
-                psn = val
-        if len(info) > 1 and info[1] != b"":
-            val = int(info[0])
-        return psn, lsn
 
-    def readOpmodeRequest(self, req: int):
+    def __readOpmodeRequest(self, req: int):
         buff = array("b")
         sum = req
-        reqlen = ord(self.readchar())
+        reqlen = ord(self.serial.readchar())
         buff.append(reqlen)
         sum = sum + reqlen
 
         for x in range(reqlen, 0, -1):
-            rb = ord(self.readchar())
+            rb = ord(self.serial.readchar())
             buff.append(rb)
             sum = sum + rb
 
@@ -126,7 +65,7 @@ class PDDemulator:
         sum = sum % 0x100
         sum = sum ^ 0xFF
 
-        chkbit = self.readchar()
+        chkbit = self.serial.readchar()
         cksum = ord(chkbit)
 
         if cksum == sum:
@@ -138,37 +77,34 @@ class PDDemulator:
                 print("Checksum mismatch!!")
             return None
 
-    def handleRequests(self):
-        synced = False
+    def handleRequests(self): # never returns
         while True:
             self.handleRequest()
-        # never returns
-        return
 
     def handleRequest(self, blocking=True) -> None:
         if not blocking:
             if self.ser.in_waiting == 0:
                 return
-        inc = self.readchar()
+        inc = self.serial.readchar()
         if self.FDCmode:
-            self.handleFDCmodeRequest(inc)
+            self.__handleFDCmodeRequest(inc)
         else:
             # in OpMode, look for ZZ
-            # inc = self.readchar()
+            # inc = self.serial.readchar()
             if inc != b"Z":
                 return
-            inc = self.readchar()
+            inc = self.serial.readchar()
             if inc == b"Z":
-                self.handleOpModeRequest()
+                self.__handleOpModeRequest()
             else:
                 print(f'Unknown op mode command: {hex(ord(inc))}')
 
-    def handleOpModeRequest(self) -> None:
+    def __handleOpModeRequest(self) -> None:
         req = ord(self.ser.read())
         print(f"Request: {req}" )
         if req == 0x08:
             # Change to FDD emulation mode (no data returned)
-            inbuf = self.readOpmodeRequest(req)
+            inbuf = self.__readOpmodeRequest(req)
             if inbuf != None:
                 # Change Modes, leave any incoming serial data in buffer
                 self.FDCmode = True
@@ -176,7 +112,7 @@ class PDDemulator:
             print("Invalid OpMode request code 0X%02X received" % req)
         return
 
-    def handleFDCmodeRequest(self, cmd: bytes) -> None:
+    def __handleFDCmodeRequest(self, cmd: bytes) -> None:
         # Commands may be followed by an optional space
         # PSN (physical sector) range 0-79
         # LSN (logical sector) range 0-(number of logical sectors in a physical sector)
@@ -207,17 +143,17 @@ class PDDemulator:
         match cmd:
 
             case b"\r":
-                self.writebytes(b"00000000")
+                self.serial.writebytes(b"00000000")
                 return
 
             case b"Z":
                 # Hmmm, looks like we got the start of an Opmode Request
-                inc = self.readchar()
+                inc = self.serial.readchar()
                 if inc == b"Z":
                     # definitely!
                     print("Detected Opmode Request in FDC Mode, switching to OpMode")
                     self.FDCmode = False
-                    self.handleOpModeRequest()
+                    self.__handleOpModeRequest()
 
             case b"M":
                 # apparently not used by brother knitting machine
@@ -234,7 +170,7 @@ class PDDemulator:
 
             case b"F" | b"G":
                 print('FDC Format')
-                info = self.readFDDRequest()
+                info = self.__readFDDRequest()
 
                 if len(info) != 1:
                     print(
@@ -261,13 +197,13 @@ class PDDemulator:
 
                 # But this is probably more correct
                 if cmd == b"G":
-                    self.writebytes(b"00000000")
+                    self.serial.writebytes(b"00000000")
                 else:
-                    self.writebytes(b"000000FF")
+                    self.serial.writebytes(b"000000FF")
 
-                more = self.readchar()
+                more = self.serial.readchar()
                 if more:
-                    self.handleFDCmodeRequest(more)
+                    self.__handleFDCmodeRequest(more)
 
                 # After a format, we always start out with OPMode again
                 self.FDCmode = False
@@ -275,47 +211,47 @@ class PDDemulator:
             case b"A":
                 # Followed by physical sector number (0-79), defaults to 0
                 # returns ID data, not sector data
-                info = self.readFDDRequest()
-                psn, _ = self.getPsnLsn(info)
+                info = self.__readFDDRequest()
+                psn, _ = SerialConnection.getPsnLsn(info)
                 print(f"FDC Read ID Section {psn}")
 
                 try:
                     id = self.disk.getSectorID(psn)
                 except:
                     print(f"Error getting Sector ID {psn}, quitting")
-                    self.writebytes(b"80000000")
+                    self.serial.writebytes(b"80000000")
                     raise
 
 
                 resp = b"00" + b"%02X" % psn + b"0000"
                 # resp = b"0000" + b"%02X" % psn + b"00"
                 print(resp)
-                self.writebytes(resp)
+                self.serial.writebytes(resp)
 
                 # see whether to send data
-                go = self.readchar()
+                go = self.serial.readchar()
                 if go == b"\r":
-                    self.writebytes(id)
+                    self.serial.writebytes(id)
 
             case b"R":
                 # Followed by Physical Sector Number PSN and Logical Sector Number LSN
-                info = self.readFDDRequest()
-                psn, lsn = self.getPsnLsn(info)
+                info = self.__readFDDRequest()
+                psn, lsn = SerialConnection.getPsnLsn(info)
                 print("FDC Read one Logical Sector %d" % psn)
 
                 try:
                     sd = self.disk.readSector(psn, lsn)
                 except:
                     print("Failed to read Sector %d, quitting" % psn)
-                    self.writebytes(b"80000000")
+                    self.serial.writebytes(b"80000000")
                     raise
 
-                self.writebytes(b"00" + b"%02X" % psn + b"0000")
+                self.serial.writebytes(b"00" + b"%02X" % psn + b"0000")
 
                 # see whether to send data
-                go = self.readchar()
+                go = self.serial.readchar()
                 if go == b"\r":
-                    self.writebytes(sd)
+                    self.serial.writebytes(sd)
 
             case b"S":
                 # We receive (optionally) PSN, (optionally) LSN
@@ -325,18 +261,18 @@ class PDDemulator:
                 # will be returned. The brother machine always sends
                 # PSN = 0, so it is unknown whether searching should
                 # start at Sector 0 or at the PSN sector
-                info = self.readFDDRequest()
-                psn, lsn = self.getPsnLsn(info)
+                info = self.__readFDDRequest()
+                psn, lsn = SerialConnection.getPsnLsn(info)
                 print("FDC Search ID Section %d" % psn)
 
                 # Now we must send status (success)
-                self.writebytes(b"00" + b"%02X" % psn + b"0000")
+                self.serial.writebytes(b"00" + b"%02X" % psn + b"0000")
 
-                # self.writebytes(b'00000000')
+                # self.serial.writebytes(b'00000000')
 
                 # we receive 12 bytes here
                 # compare with the specified sector (formatted is apparently zeros)
-                id = self.readsomechars(12)
+                id = self.serial.readsomechars(12)
                 print("checking ID for sector %d" % psn)
 
                 try:
@@ -359,7 +295,7 @@ class PDDemulator:
                 # infinite retries 70000000
                 # infinite retries 80000000
 
-                self.writebytes(status)
+                self.serial.writebytes(status)
 
                 # Stay in FDC mode
 
@@ -367,36 +303,36 @@ class PDDemulator:
                 # Followed by PSN 0-79, defaults to 0
                 # When received, send result status, if not error, wait
                 # for data to be written, then after write, send status again
-                info = self.readFDDRequest()
-                psn, lsn = self.getPsnLsn(info)
+                info = self.__readFDDRequest()
+                psn, lsn = SerialConnection.getPsnLsn(info)
                 print(f"FDC Write ID section {psn}, lsn {lsn}")
 
-                self.writebytes(b"00" + b"%02X" % psn + b"0000")
+                self.serial.writebytes(b"00" + b"%02X" % psn + b"0000")
 
-                id = self.readsomechars(12)
+                id = self.serial.readsomechars(12)
 
                 try:
                     self.disk.setSectorID(psn, id)
                 except:
                     print("Failed to write ID for sector %d, quitting" % psn)
-                    self.writebytes(b"80000000")
+                    self.serial.writebytes(b"80000000")
                     raise
 
-                self.writebytes(b"00" + b"%02X" % psn + b"0000")
+                self.serial.writebytes(b"00" + b"%02X" % psn + b"0000")
 
-                more = self.readchar()
+                more = self.serial.readchar()
                 if more:
-                    self.handleFDCmodeRequest(more)
+                    self.__handleFDCmodeRequest(more)
 
             case b"W" | b"X":
-                info = self.readFDDRequest()
-                psn, lsn = self.getPsnLsn(info)
+                info = self.__readFDDRequest()
+                psn, lsn = SerialConnection.getPsnLsn(info)
                 print("FDC Write logical sector %d" % psn)
 
                 # Now we must send status (success)
-                self.writebytes(b"00" + b"%02X" % psn + b"0000")
+                self.serial.writebytes(b"00" + b"%02X" % psn + b"0000")
 
-                indata = self.readsomechars(1024)
+                indata = self.serial.readsomechars(1024)
                 try:
                     self.disk.writeSector(psn, lsn, indata)
                     for l in self.listeners:
@@ -404,10 +340,10 @@ class PDDemulator:
                     print("Saved data in dat file: ", self.disk.lastDatFilePath)
                 except:
                     print("Failed to write data for sector %d, quitting" % psn)
-                    self.writebytes(b"80000000")
+                    self.serial.writebytes(b"80000000")
                     raise
 
-                self.writebytes(b"00" + b"%02X" % psn + b"0000")
+                self.serial.writebytes(b"00" + b"%02X" % psn + b"0000")
 
             case _:
                 print(f"Unknown FDC command {cmd} received")

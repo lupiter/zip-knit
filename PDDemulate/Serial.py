@@ -1,0 +1,68 @@
+import serial
+
+
+class SerialConnection:
+    ser: serial.Serial
+
+    def __init__(self, port: str) -> None:
+        print("trying to open port: ", port)
+        if self.noserial is False:
+            self.ser = serial.Serial(
+                port=port,
+                baudrate=9600,
+                parity=serial.PARITY_NONE,
+                stopbits=serial.STOPBITS_ONE,
+                timeout=False,
+                xonxoff=False,
+                rtscts=False,
+                dsrdtr=False,
+            )
+            #            self.ser.setRTS(True)
+            if self.ser == None:
+                print("Unable to open serial device %s" % port)
+                raise IOError
+        return
+
+    def __del__(self) -> None:
+        if self.ser:
+            self.ser.close()
+        return
+
+    def dumpchars(self) -> None:
+        num = 1
+        while 1:
+            inc = self.ser.read()
+            if len(inc) != 0:
+                print("flushed 0x%02X (%d)" % (ord(inc), num))
+                num = num + 1
+            else:
+                break
+        return
+
+    def readsomechars(self, num: int) -> bytes:
+        sch = self.ser.read(num)
+        while len(sch) < num:
+            sch += self.ser.read(num - len(sch))
+        return sch
+
+    def readchar(self) -> bytes:
+        inc = ""
+        while len(inc) == 0:
+            inc = self.ser.read()
+        return inc
+
+    def writebytes(self, b: bytes) -> None:
+        self.ser.write(b)
+        return
+    
+    @staticmethod
+    def getPsnLsn(info: list[bytes]) -> tuple[int, int]:
+        psn = 0
+        lsn = 1
+        if len(info) >= 1 and info[0] != b"":
+            val = int(info[0])
+            if psn <= 79:
+                psn = val
+        if len(info) > 1 and info[1] != b"":
+            val = int(info[0])
+        return psn, lsn

@@ -1,7 +1,9 @@
 #!/usr/bin/env python
 
 import array
-from array import *
+from array import * # type: ignore
+import ctypes
+import typing
 
 __version__ = '1.0'
 
@@ -27,13 +29,13 @@ unknownList = {'0700':0x0700, '0701':0x0701,
                '0711':0x0711, '0712':0x0712, '0713':0x0713, '0714':0x0714,
                '0715':0x0715}
 
-def nibbles(achar):
+def nibbles(achar: int) -> tuple[int, int]:
     #print('0x%02X' % achar)
     msn = (achar & 0xF0) >> 4
     lsn = achar & 0x0F
     return msn, lsn
 
-def hto(hundreds, tens, ones):
+def hto(hundreds: int, tens: int, ones: int) -> int:
     return (100 * hundreds) + (10 * tens) + ones
 
 def roundeven(val: int) -> int:
@@ -51,21 +53,21 @@ def roundfour(val: int) -> int:
     else:
         return val
 
-def nibblesPerRow(stitches) -> int:
+def nibblesPerRow(stitches: int) -> int:
     # there are four stitches per nibble
     # each row is nibble aligned
     return(roundfour(stitches)/4)
 
-def bytesPerPattern(stitches, rows):
+def bytesPerPattern(stitches: int, rows: int) -> int:
     nibbs = rows * nibblesPerRow(stitches)
-    bytes = roundeven(nibbs)/2
-    return bytes
+    b = roundeven(nibbs)/2
+    return b
 
-def bytesForMemo(rows):
-    bytes = roundeven(rows)/2
-    return bytes
+def bytesForMemo(rows: int) -> int:
+    b = roundeven(rows)/2
+    return b
 
-def bytesPerPatternAndMemo(stitches, rows):
+def bytesPerPatternAndMemo(stitches: int, rows: int) -> int:
     patbytes = bytesPerPattern(stitches, rows)
     memobytes = bytesForMemo(rows)
     return patbytes + memobytes
@@ -73,7 +75,8 @@ def bytesPerPatternAndMemo(stitches, rows):
 class brotherFile(object):
 
     def __init__(self, fn):
-        self.dfn = None
+        self.dfn: str
+        self.data: bytes
         self.verbose = False
         try:
             try:
@@ -105,15 +108,15 @@ class brotherFile(object):
     def __del__(self):
         return
 
-    def getIndexedByte(self, index) -> int:
+    def getIndexedByte(self, index: int) -> int:
         return self.data[index]
 
-    def setIndexedByte(self, index, b):
+    def setIndexedByte(self, index: int, b: int):
         # python strings are mutable so we
         # will convert the string to a char array, poke
         # and convert back
         dataarray = array('c')
-        dataarray.fromstring(self.data)
+        dataarray.frombytes(self.data)
 
         if self.verbose:
             print(("* writing ", hex(b), "to", hex(index)))
@@ -124,13 +127,13 @@ class brotherFile(object):
 
         # save the new string. sure its not very memory-efficient
         # but who cares?
-        self.data = dataarray.tostring()
+        self.data = dataarray.tobytes()
         
     # handy for debugging
-    def getFullData(self):
+    def getFullData(self) -> bytes:
         return self.data
 
-    def getIndexedNibble(self, offset: int, nibble: int):
+    def getIndexedNibble(self, offset: int, nibble: int) -> int:
         # nibbles is zero based
         bytes = int(nibble/2)
         m, l = nibbles(self.data[offset-bytes])
@@ -160,7 +163,7 @@ class brotherFile(object):
                 stitches = stitches - 1
         return row
 
-    def getPatterns(self, patternNumber = None):
+    def getPatterns(self, patternNumber: typing.Optional[int] = None) -> list[dict]:
         """
         Get a list of custom patterns stored in the file, or
         information for a single pattern.
@@ -174,7 +177,7 @@ class brotherFile(object):
           patternOffset
           memoOffset
         """
-        patlist = []
+        patlist: list[dict] = []
         idx = 0
         pptr = initPatternOffset
         for pi in range(1, 100):
@@ -222,7 +225,7 @@ class brotherFile(object):
                 break
         return patlist
 
-    def getMemo(self):
+    def getMemo(self) -> bytes:
         """
         Return an array containing the memo
         information for the pattern currently in memory
@@ -234,13 +237,13 @@ class brotherFile(object):
             rows = 0 # TODO XXXXXXXXX
         return [0]
 
-    def patternNumber(self):
+    def patternNumber(self) -> int:
         sn, pnh = nibbles(self.data[currentPatternAddr])
         pnt, pno = nibbles(self.data[currentPatternAddr+1])
         pattern = hto(pnh,pnt,pno)
         return(pattern)
 
-    def getPatternMemo(self, patternNumber):
+    def getPatternMemo(self, patternNumber: int) -> bytes:
         """
         Return an array containing the memo
         information for a custom pattern. The array
@@ -264,7 +267,7 @@ class brotherFile(object):
                 rows = rows - 1
         return memos
 
-    def getPattern(self, patternNumber):
+    def getPattern(self, patternNumber: int) -> list[bytes]:
         """
         Return an array containing the pattern
         information for a pattern.
@@ -287,7 +290,7 @@ class brotherFile(object):
             pattern.append(arow)
         return pattern
 
-    def displayPattern(self, patternNumber):
+    def displayPattern(self, patternNumber: int) -> None:
         """
         Display a user pattern stored in file saved 
         from the brother knitting machine. Patterns
@@ -297,13 +300,13 @@ class brotherFile(object):
 
         return
 
-    def rowNumber(self):
+    def rowNumber(self) -> int:
         sn, rnh = nibbles(self.data[currentRowNumberAddr])
         rnt, rno = nibbles(self.data[currentRowNumberAddr+1])
         rowno = hto(rnh,rnt,rno)
         return(rowno)
 
-    def nextRow(self):
+    def nextRow(self) -> bytes:
         return self.getRowData(nextRowAddr, 200, 0)
         
     def selectorValue(self) -> int:
@@ -312,7 +315,7 @@ class brotherFile(object):
     def carriageStatus(self) -> int:
         return self.data[carriageStatusAddr]
 
-    def motifData(self):
+    def motifData(self) -> list[dict]:
         motiflist = []
         addr = 0x07FB
         for i in range(6):
@@ -331,7 +334,7 @@ class brotherFile(object):
             addr = addr - 3
         return motiflist
 
-    def patternPosition(self):
+    def patternPosition(self) -> dict:
         addr = 0x07FE
         foo, ph = nibbles(self.data[addr])
         if ph & 8:

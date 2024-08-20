@@ -15,16 +15,15 @@ class PatternDumper:
     def __init__(self):
         self.printInfoCallback = self.printInfo
 
-    def dumppattern(self,argv):
+    def dumppattern(self,argv: list[str]):
         if len(argv) < 1:
             raise ArgumentsException()
         
         result = Result()
 
+        patt = 0
         if len(argv) == 2:
             patt = int(argv[1])
-        else:
-            patt = 0
 
         bf = brother.brotherFile(argv[0])
         
@@ -38,7 +37,7 @@ class PatternDumper:
 
                 # first dump the 99 'pattern id' blocks
                 for i in range(99):
-                    print("program entry",i)
+                    print(f"program entry {i}")
                     # each block is 7 bytes
                     bytenum = i*7
 
@@ -53,27 +52,27 @@ class PatternDumper:
                     bytenum += 1
 
                     unk1 = bf.getIndexedByte(bytenum)
-                    print("\t",hex(bytenum),": ",hex(unk1),"\t(unknown)")
+                    print(f"\t{hex(bytenum)}: {hex(unk1)},\t(unknown)")
                     bytenum += 1
 
                     rows100 =  bf.getIndexedByte(bytenum)
-                    print("\t",hex(bytenum),": ",hex(rows100),"\t(rows = ", (rows100 >> 4)*100, " + ", (rows100 & 0xF)*10)
+                    print(f"\t{hex(bytenum)}: {hex(rows100)}\t(rows = {(rows100 >> 4)*100} + {(rows100 & 0xF)*10}")
                     bytenum += 1
 
                     rows1 =  bf.getIndexedByte(bytenum)
-                    print("\t",hex(bytenum),": ",hex(rows1),"\t\t+ ", (rows1 >> 4), " stiches = ", (rows1 & 0xF)*100,"+")
+                    print(f"\t{hex(bytenum)}: {hex(rows1)}\t\t+ {(rows1 >> 4)} stiches = {(rows1 & 0xF)*100,"+"}")
                     bytenum += 1
 
                     stitches10 =  bf.getIndexedByte(bytenum)
-                    print("\t",hex(bytenum),": ",hex(stitches10),"\t\t+ ", (stitches10 >> 4)*10, " +", (stitches10 & 0xF),")")
+                    print(f"\t{hex(bytenum)}: {hex(stitches10)}\t\t+ {(stitches10 >> 4)*10} + {(stitches10 & 0xF)})")
                     bytenum += 1
 
                     prog100 = bf.getIndexedByte(bytenum)
-                    print("\t",hex(bytenum),": ",hex(prog100),"\t(unknown , prog# = ", (prog100&0xF) * 100,"+")
+                    print(f"\t{hex(bytenum)}: {hex(prog100)}\t(unknown , prog# = {(prog100&0xF) * 100}+")
                     bytenum += 1
 
                     prog10 = bf.getIndexedByte(bytenum)
-                    print("\t",hex(bytenum),": ",hex(prog10),"\t\t + ", (prog10>>4) * 10,"+",(prog10&0xF),")")
+                    print(f"\t{hex(bytenum)}: {hex(prog10)}\t\t + {(prog10>>4) * 10} + {(prog10&0xF)})")
                     bytenum += 1
 
                 print("============================================")

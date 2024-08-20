@@ -4,8 +4,8 @@
 from .Config import Config
 from .Messages import Messages
 from app.gui.Gui import Gui
-from PDDemulate import PDDemulator
-from PDDemulate import PDDEmulatorListener
+from PDDemulate.Drive import PDDemulator
+from PDDemulate.Listener import PDDEmulatorListener
 from dumppattern import PatternDumper
 from insertpattern import PatternInserter
 import tkinter

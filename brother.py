@@ -28,30 +28,30 @@ unknownList = {'0700':0x0700, '0701':0x0701,
                '0715':0x0715}
 
 def nibbles(achar):
-    #print '0x%02X' % ord(achar)
-    msn = (ord(achar) & 0xF0) >> 4
-    lsn = ord(achar) & 0x0F
+    #print('0x%02X' % achar)
+    msn = (achar & 0xF0) >> 4
+    lsn = achar & 0x0F
     return msn, lsn
 
 def hto(hundreds, tens, ones):
     return (100 * hundreds) + (10 * tens) + ones
 
-def roundeven(val):
-    return (val+(val%2))
+def roundeven(val: int) -> int:
+    return int((val+(val%2)))
 
-def roundeight(val):
+def roundeight(val: int) -> int:
     if val % 8:
-        return val + (8-(val%8))
+        return int(val + (8-(val%8)))
     else:
         return val
 
-def roundfour(val):
+def roundfour(val: int) -> int:
     if val % 4:
-        return val + (4-(val%4))
+        return int(val + (4-(val%4)))
     else:
         return val
 
-def nibblesPerRow(stitches):
+def nibblesPerRow(stitches) -> int:
     # there are four stitches per nibble
     # each row is nibble aligned
     return(roundfour(stitches)/4)
@@ -105,8 +105,8 @@ class brotherFile(object):
     def __del__(self):
         return
 
-    def getIndexedByte(self, index):
-        return ord(self.data[index])
+    def getIndexedByte(self, index) -> int:
+        return self.data[index]
 
     def setIndexedByte(self, index, b):
         # python strings are mutable so we
@@ -130,20 +130,20 @@ class brotherFile(object):
     def getFullData(self):
         return self.data
 
-    def getIndexedNibble(self, offset, nibble):
+    def getIndexedNibble(self, offset: int, nibble: int):
         # nibbles is zero based
-        bytes = nibble/2
+        bytes = int(nibble/2)
         m, l = nibbles(self.data[offset-bytes])
         if nibble % 2:
             return m
         else:
             return l
 
-    def getRowData(self, pattOffset, stitches, rownumber):
+    def getRowData(self, pattOffset: int, stitches: int, rownumber: int) -> bytes:
         row=array('B')
         nibspr = nibblesPerRow(stitches)
-        startnib = nibspr * rownumber
-        endnib = startnib + nibspr
+        startnib = int(nibspr * rownumber)
+        endnib = int(startnib + nibspr)
 
         for i in range(startnib, endnib, 1):
             nib = self.getIndexedNibble(pattOffset, i)
@@ -178,11 +178,11 @@ class brotherFile(object):
         idx = 0
         pptr = initPatternOffset
         for pi in range(1, 100):
-            flag = ord(self.data[idx])
+            flag = self.data[idx]
             if self.verbose:
                 print(('Entry %d, flag is 0x%02X' % (pi, flag)))
             idx = idx + 1
-            unknown = ord(self.data[idx]) # is this the mode? or track? mode 1 disk has two tracks, mode 2 disk has 40 tracks
+            unknown = self.data[idx] # is this the mode? or track? mode 1 disk has two tracks, mode 2 disk has 40 tracks
             idx = idx + 1
             rh, rt = nibbles(self.data[idx])
             idx = idx + 1
@@ -274,7 +274,7 @@ class brotherFile(object):
             return None
         pattern = []
 
-        patoff = list[0]['pattern']
+        patoff = int(list[0]['pattern'])
         rows = list[0]['rows']
         stitches = list[0]['stitches']
 
@@ -306,11 +306,11 @@ class brotherFile(object):
     def nextRow(self):
         return self.getRowData(nextRowAddr, 200, 0)
         
-    def selectorValue(self):
-        return ord(self.data[selectAddr])
+    def selectorValue(self) -> int:
+        return self.data[selectAddr]
 
-    def carriageStatus(self):
-        return ord(self.data[carriageStatusAddr])
+    def carriageStatus(self) -> int:
+        return self.data[carriageStatusAddr]
 
     def motifData(self):
         motiflist = []
@@ -348,19 +348,19 @@ class brotherFile(object):
     def unknownOne(self):
         info = array('B')
         for i in range(0x06E0, 0x06E5):
-            info.append(ord(self.data[i]))
+            info.append(self.data[i])
         return info
 
     def unknownMemoRange(self):
         info = array('B')
         for i in range(0x0731, 0x0787):
-            info.append(ord(self.data[i]))
+            info.append(self.data[i])
         return info
 
     def unknownEndRange(self):
         info = array('B')
         for i in range(0x07D0, 0x07E9):
-            info.append(ord(self.data[i]))
+            info.append(self.data[i])
         return info
 
     def unknownAddrs(self):

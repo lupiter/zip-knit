@@ -6,7 +6,7 @@ import brother
 # import convenience functions from brother module
 from brother import nibblesPerRow, bytesPerPattern, bytesForMemo
 
-DEBUG = 0
+DEBUG = True
 
 version = '1.0'
 

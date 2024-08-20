@@ -259,7 +259,8 @@ class KnittingApp(tkinter.Tk):
             result = self.patternDumper.dumppattern(
                 [self.currentDatFile, str(pattern["number"])]
             )
-            self.printPatternOnCanvas(result.pattern)
+            if result.pattern:
+                self.printPatternOnCanvas(result.pattern)
         self.pattern = pattern
 
     def getPatternTitle(self, pattern) -> str:

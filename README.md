@@ -13,6 +13,7 @@ To be able to:
 
 1. Talk to a KH-970 ✅
 2. Read the "floppy" format produced by "formatting" ✅
+2. Set up the code for multiprocessing so we can handle serial more reliably
 3. Read the "floppy" data produced by saving the CB-1 stored patterns 
 4. Replace/modify patterns
 5. Replace/modify garments
@@ -22,6 +23,8 @@ To be able to:
 ### Status
 
 Step 3: It can kind of read the data, but is very confused by the format of what I've saved so far which is just garment shapes.
+
+I'm now just being an agressive nit picker and making the code look how I like. But once done I hope to be be in a better place to set up multiprocessing which should make the serial connection easier and more reliable.
 
 I should find somewhere to archive the saved binary data for future use.
 

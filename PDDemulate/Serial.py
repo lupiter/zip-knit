@@ -56,13 +56,13 @@ class SerialConnection:
         return
     
     @staticmethod
-    def getPsnLsn(info: list[bytes]) -> tuple[int, int]:
-        psn = 0
-        lsn = 1
+    def getPhysicalLogicalSectorNumbers(info: list[bytes]) -> tuple[int, int]:
+        physical = 0
+        logical = 1
         if len(info) >= 1 and info[0] != b"":
             val = int(info[0])
-            if psn <= 79:
-                psn = val
+            if physical <= 79:
+                physical = val
         if len(info) > 1 and info[1] != b"":
             val = int(info[0])
-        return psn, lsn
+        return physical, logical

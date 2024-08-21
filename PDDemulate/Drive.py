@@ -4,6 +4,15 @@ from PDDemulate.Disk import Disk
 from PDDemulate.Listener import PDDEmulatorListener
 from PDDemulate.Serial import SerialConnection
 
+FORMAT_LENGTH = {
+    b"0": 64,
+    b"1": 80,
+    b"2": 128,
+    b"3": 256,
+    b"4": 512,
+    b"5": 1024,
+    b"6": 1280,
+}
 
 class PDDemulator:
     serial: SerialConnection
@@ -14,15 +23,6 @@ class PDDemulator:
         self.FDCmode = False
         # bytes per logical sector
         self.bpls = 1024
-        self.formatLength = {
-            b"0": 64,
-            b"1": 80,
-            b"2": 128,
-            b"3": 256,
-            b"4": 512,
-            b"5": 1024,
-            b"6": 1280,
-        }
         return
     
     def open(self, cport="/dev/ttyUSB0") -> None:
@@ -114,9 +114,9 @@ class PDDemulator:
 
     def __handleFDCmodeRequest(self, cmd: bytes) -> None:
         # Commands may be followed by an optional space
-        # PSN (physical sector) range 0-79
-        # LSN (logical sector) range 0-(number of logical sectors in a physical sector)
-        # LSN defaults to 1 if not supplied
+        # physical sector number range 0-79
+        # logical sector number range 0-(number of logical sectors in a physical sector)
+        # logical sector defaults to 1 if not supplied
         #
         # Result code information (verbatim from the Tandy reference):
         #
@@ -169,181 +169,22 @@ class PDDemulator:
                 # See doc - return zero for disk installed and not swapped
 
             case b"F" | b"G":
-                print('FDC Format')
-                info = self.__readFDDRequest()
-
-                if len(info) != 1:
-                    print(
-                        "wrong number of params (%d) received, assuming 1024 bytes per sector"
-                        % len(info)
-                    )
-                    bps = 1024
-                else:
-                    try:
-                        bps = self.formatLength[info[0]]
-                    except KeyError:
-                        print(
-                            f"Invalid code {info[0]} for format, assuming 1024 bytes per sector"
-                        )
-                        bps = 1024
-                # we assume 1024 because that's what the brother machine uses
-                if self.bpls != bps:
-                    print("Bad news, differing sector sizes")
-                    self.bpls = bps
-
-                print(f"Formatting disk, {bps}")
-                self.disk.format()
-                print("Format complete, replying")
-
-                # But this is probably more correct
-                if cmd == b"G":
-                    self.serial.writebytes(b"00000000")
-                else:
-                    self.serial.writebytes(b"000000FF")
-
-                more = self.serial.readchar()
-                if more:
-                    self.__handleFDCmodeRequest(more)
-
-                # After a format, we always start out with OPMode again
-                self.FDCmode = False
+                self.__format(withCheck=(cmd == b"G"))
 
             case b"A":
-                # Followed by physical sector number (0-79), defaults to 0
-                # returns ID data, not sector data
-                info = self.__readFDDRequest()
-                psn, _ = SerialConnection.getPsnLsn(info)
-                print(f"FDC Read ID Section {psn}")
-
-                try:
-                    id = self.disk.getSectorID(psn)
-                except:
-                    print(f"Error getting Sector ID {psn}, quitting")
-                    self.serial.writebytes(b"80000000")
-                    raise
-
-
-                resp = b"00" + b"%02X" % psn + b"0000"
-                # resp = b"0000" + b"%02X" % psn + b"00"
-                print(resp)
-                self.serial.writebytes(resp)
-
-                # see whether to send data
-                go = self.serial.readchar()
-                if go == b"\r":
-                    self.serial.writebytes(id)
+                self.__readIdSection()
 
             case b"R":
-                # Followed by Physical Sector Number PSN and Logical Sector Number LSN
-                info = self.__readFDDRequest()
-                psn, lsn = SerialConnection.getPsnLsn(info)
-                print("FDC Read one Logical Sector %d" % psn)
-
-                try:
-                    sd = self.disk.readSector(psn, lsn)
-                except:
-                    print("Failed to read Sector %d, quitting" % psn)
-                    self.serial.writebytes(b"80000000")
-                    raise
-
-                self.serial.writebytes(b"00" + b"%02X" % psn + b"0000")
-
-                # see whether to send data
-                go = self.serial.readchar()
-                if go == b"\r":
-                    self.serial.writebytes(sd)
+                self.__readLogicalSector()
 
             case b"S":
-                # We receive (optionally) PSN, (optionally) LSN
-                # This is not documented well at all in the manual
-                # What is expected is that all sectors will be searched
-                # and the sector number of the first matching sector
-                # will be returned. The brother machine always sends
-                # PSN = 0, so it is unknown whether searching should
-                # start at Sector 0 or at the PSN sector
-                info = self.__readFDDRequest()
-                psn, lsn = SerialConnection.getPsnLsn(info)
-                print("FDC Search ID Section %d" % psn)
-
-                # Now we must send status (success)
-                self.serial.writebytes(b"00" + b"%02X" % psn + b"0000")
-
-                # self.serial.writebytes(b'00000000')
-
-                # we receive 12 bytes here
-                # compare with the specified sector (formatted is apparently zeros)
-                id = self.serial.readsomechars(12)
-                print("checking ID for sector %d" % psn)
-
-                try:
-                    status = self.disk.findSectorID(psn, id)
-                except:
-                    print("FAIL")
-                    status = "30000000"
-                    raise
-
-                print("returning %s" % status)
-                # guessing - doc is unclear, but says that S always ends in 0000
-                # MATCH 00000000
-                # MATCH 02000000
-                # infinite retries 10000000
-                # infinite retries 20000000
-                # blinking error 30000000
-                # blinking error 40000000
-                # infinite retries 50000000
-                # infinite retries 60000000
-                # infinite retries 70000000
-                # infinite retries 80000000
-
-                self.serial.writebytes(status)
-
-                # Stay in FDC mode
+                self.__searchIdSection()
 
             case b"B" | b"C":
-                # Followed by PSN 0-79, defaults to 0
-                # When received, send result status, if not error, wait
-                # for data to be written, then after write, send status again
-                info = self.__readFDDRequest()
-                psn, lsn = SerialConnection.getPsnLsn(info)
-                print(f"FDC Write ID section {psn}, lsn {lsn}")
-
-                self.serial.writebytes(b"00" + b"%02X" % psn + b"0000")
-
-                id = self.serial.readsomechars(12)
-
-                try:
-                    self.disk.setSectorID(psn, id)
-                except:
-                    print("Failed to write ID for sector %d, quitting" % psn)
-                    self.serial.writebytes(b"80000000")
-                    raise
-
-                self.serial.writebytes(b"00" + b"%02X" % psn + b"0000")
-
-                more = self.serial.readchar()
-                if more:
-                    self.__handleFDCmodeRequest(more)
+                self.__writeIdSection(withCheck=(cmd == b"B"))
 
             case b"W" | b"X":
-                info = self.__readFDDRequest()
-                psn, lsn = SerialConnection.getPsnLsn(info)
-                print("FDC Write logical sector %d" % psn)
-
-                # Now we must send status (success)
-                self.serial.writebytes(b"00" + b"%02X" % psn + b"0000")
-
-                indata = self.serial.readsomechars(1024)
-                try:
-                    self.disk.writeSector(psn, lsn, indata)
-                    for l in self.listeners:
-                        l.dataReceived(self.disk.lastDatFilePath)
-                    print("Saved data in dat file: ", self.disk.lastDatFilePath)
-                except:
-                    print("Failed to write data for sector %d, quitting" % psn)
-                    self.serial.writebytes(b"80000000")
-                    raise
-
-                self.serial.writebytes(b"00" + b"%02X" % psn + b"0000")
+                self.__writeLogicalSector(withCheck=(cmd == b"W"))
 
             case _:
                 print(f"Unknown FDC command {cmd} received")
@@ -351,4 +192,179 @@ class PDDemulator:
         # return to Operational Mode
         return
 
+    def __format(self, withCheck=False) -> None:
+        print('FDC Format')
+        info = self.__readFDDRequest()
 
+        if len(info) != 1:
+            print(
+                "wrong number of params (%d) received, assuming 1024 bytes per sector"
+                % len(info)
+            )
+            bps = 1024
+        else:
+            try:
+                bps = FORMAT_LENGTH[info[0]]
+            except KeyError:
+                print(
+                    f"Invalid code {info[0]} for format, assuming 1024 bytes per sector"
+                )
+                bps = 1024
+        # we assume 1024 because that's what the brother machine uses
+        if self.bpls != bps:
+            print("Bad news, differing sector sizes")
+            self.bpls = bps
+
+        print(f"Formatting disk, {bps}")
+        self.disk.format()
+        print("Format complete, replying")
+
+        # But this is probably more correct
+        if withCheck:
+            self.serial.writebytes(b"00000000")
+        else:
+            self.serial.writebytes(b"000000FF")
+
+        more = self.serial.readchar()
+        if more:
+            self.__handleFDCmodeRequest(more)
+
+        # After a format, we always start out with OPMode again
+        self.FDCmode = False
+
+    def __readIdSection(self) -> None:
+        # Followed by physical sector number (0-79), defaults to 0
+        # returns ID data, not sector data
+        info = self.__readFDDRequest()
+        physical_sector, _ = SerialConnection.getPhysicalLogicalSectorNumbers(info)
+        print(f"FDC Read ID Section {physical_sector}")
+
+        try:
+            id = self.disk.getSectorID(physical_sector)
+        except:
+            print(f"Error getting Sector ID {physical_sector}, quitting")
+            self.serial.writebytes(b"80000000")
+            raise
+
+
+        resp = b"00" + b"%02X" % physical_sector + b"0000"
+        # resp = b"0000" + b"%02X" % physical_sector + b"00"
+        print(resp)
+        self.serial.writebytes(resp)
+
+        # see whether to send data
+        go = self.serial.readchar()
+        if go == b"\r":
+            self.serial.writebytes(id) 
+
+    def __readLogicalSector(self) -> None:
+        # Followed by Physical Sector Number and Logical Sector Number
+        info = self.__readFDDRequest()
+        physical_sector, logical_sector = SerialConnection.getPhysicalLogicalSectorNumbers(info)
+        print("FDC Read one Logical Sector %d" % physical_sector)
+
+        try:
+            sd = self.disk.readSector(physical_sector, logical_sector)
+        except:
+            print("Failed to read Sector %d, quitting" % physical_sector)
+            self.serial.writebytes(b"80000000")
+            raise
+
+        self.serial.writebytes(b"00" + b"%02X" % physical_sector + b"0000")
+
+        # see whether to send data
+        go = self.serial.readchar()
+        if go == b"\r":
+            self.serial.writebytes(sd)
+
+    def __searchIdSection(self) -> None:
+        # We receive (optionally) physical sector number, (optionally) logical sector number
+        # This is not documented well at all in the manual
+        # What is expected is that all sectors will be searched
+        # and the sector number of the first matching sector
+        # will be returned. The brother machine always sends
+        # physical sector = 0, so it is unknown whether searching should
+        # start at Sector 0 or at the physical sector
+        info = self.__readFDDRequest()
+        physical_sector, _ = SerialConnection.getPhysicalLogicalSectorNumbers(info)
+        print("FDC Search ID Section %d" % physical_sector)
+
+        # Now we must send status (success)
+        self.serial.writebytes(b"00" + b"%02X" % physical_sector + b"0000")
+
+        # self.serial.writebytes(b'00000000')
+
+        # we receive 12 bytes here
+        # compare with the specified sector (formatted is apparently zeros)
+        id = self.serial.readsomechars(12)
+        print("checking ID for sector %d" % physical_sector)
+
+        try:
+            status = self.disk.findSectorID(physical_sector, id)
+        except:
+            print("FAIL")
+            status = "30000000"
+            raise
+
+        print("returning %s" % status)
+        # guessing - doc is unclear, but says that S always ends in 0000
+        # MATCH 00000000
+        # MATCH 02000000
+        # infinite retries 10000000
+        # infinite retries 20000000
+        # blinking error 30000000
+        # blinking error 40000000
+        # infinite retries 50000000
+        # infinite retries 60000000
+        # infinite retries 70000000
+        # infinite retries 80000000
+
+        self.serial.writebytes(status)
+
+        # Stay in FDC mode
+    
+    def __writeIdSection(self, check=False) -> None:
+        # Followed by physical sector number 0-79, defaults to 0
+        # When received, send result status, if not error, wait
+        # for data to be written, then after write, send status again
+        info = self.__readFDDRequest()
+        physical_sector, logical_sector = SerialConnection.getPhysicalLogicalSectorNumbers(info)
+        print(f"FDC Write ID section {physical_sector}, logical sector {logical_sector}")
+
+        self.serial.writebytes(b"00" + b"%02X" % physical_sector + b"0000")
+
+        id = self.serial.readsomechars(12)
+
+        try:
+            self.disk.setSectorID(physical_sector, id)
+        except:
+            print("Failed to write ID for sector %d, quitting" % physical_sector)
+            self.serial.writebytes(b"80000000")
+            raise
+
+        self.serial.writebytes(b"00" + b"%02X" % physical_sector + b"0000")
+
+        more = self.serial.readchar()
+        if more:
+            self.__handleFDCmodeRequest(more)
+
+    def __writeLogicalSector(self, check=False) -> None:
+        info = self.__readFDDRequest()
+        physical_sector, logical_sector = SerialConnection.getPhysicalLogicalSectorNumbers(info)
+        print("FDC Write logical sector %d" % physical_sector)
+
+        # Now we must send status (success)
+        self.serial.writebytes(b"00" + b"%02X" % physical_sector + b"0000")
+
+        indata = self.serial.readsomechars(1024)
+        try:
+            self.disk.writeSector(physical_sector, logical_sector, indata)
+            for l in self.listeners:
+                l.dataReceived(self.disk.lastDatFilePath)
+            print("Saved data in dat file: ", self.disk.lastDatFilePath)
+        except:
+            print("Failed to write data for sector %d, quitting" % physical_sector)
+            self.serial.writebytes(b"80000000")
+            raise
+
+        self.serial.writebytes(b"00" + b"%02X" % physical_sector + b"0000")

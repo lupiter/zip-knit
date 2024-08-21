@@ -18,7 +18,7 @@ class PDDemulator:
     serial: SerialConnection
 
     def __init__(self, basename, verbose=True):
-        self.listeners = list[PDDEmulatorListener]  # list of PDDEmulatorListener
+        self.listeners: list[PDDEmulatorListener] = []  # list of PDDEmulatorListener
         self.disk = Disk(basename)
         self.FDCmode = False
         # bytes per logical sector

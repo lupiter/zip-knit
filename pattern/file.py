@@ -1,14 +1,10 @@
-#!/usr/bin/env python
-
 import array
 from array import * # type: ignore
-import ctypes
 import typing
+from pattern.maths import nibbles, nibblesPerRow, bytesForMemo, bytesPerPatternAndMemo, roundeven, hto
 
 __version__ = '1.0'
 
-methodWithPointers = False
-methodWithPointers = True # uncomment this to use new, more precise method of finding patterns in the dat file, based on kh940 format documentation from https://github.com/stg/knittington/blob/master/doc/kh940_format.txt (should work with all kh930 and kh940 models)
 
 # Some file location constants
 initPatternOffset = 0x06DF # programmed patterns start here, grow down
@@ -29,48 +25,6 @@ unknownList = {'0700':0x0700, '0701':0x0701,
                '0711':0x0711, '0712':0x0712, '0713':0x0713, '0714':0x0714,
                '0715':0x0715}
 
-def nibbles(achar: int) -> tuple[int, int]:
-    #print('0x%02X' % achar)
-    msn = (achar & 0xF0) >> 4
-    lsn = achar & 0x0F
-    return msn, lsn
-
-def hto(hundreds: int, tens: int, ones: int) -> int:
-    return (100 * hundreds) + (10 * tens) + ones
-
-def roundeven(val: int) -> int:
-    return int((val+(val%2)))
-
-def roundeight(val: int) -> int:
-    if val % 8:
-        return int(val + (8-(val%8)))
-    else:
-        return val
-
-def roundfour(val: int) -> int:
-    if val % 4:
-        return int(val + (4-(val%4)))
-    else:
-        return val
-
-def nibblesPerRow(stitches: int) -> int:
-    # there are four stitches per nibble
-    # each row is nibble aligned
-    return(roundfour(stitches)/4)
-
-def bytesPerPattern(stitches: int, rows: int) -> int:
-    nibbs = rows * nibblesPerRow(stitches)
-    b = roundeven(nibbs)/2
-    return b
-
-def bytesForMemo(rows: int) -> int:
-    b = roundeven(rows)/2
-    return b
-
-def bytesPerPatternAndMemo(stitches: int, rows: int) -> int:
-    patbytes = bytesPerPattern(stitches, rows)
-    memobytes = bytesForMemo(rows)
-    return patbytes + memobytes
 
 class brotherFile(object):
 
@@ -89,18 +43,12 @@ class brotherFile(object):
             print(('Unable to open brother file <%s>' % fn))
             raise
         try:
-            if methodWithPointers:
-                self.data = self.df.read(-1)
-            else:
-                self.data = self.df.read(2048)
+            self.data = self.df.read(-1)
             self.df.close()
             if len(self.data) == 0:
                 raise Exception()
         except:
-            if methodWithPointers:
-                print(('Unable to read 2048 bytes from file <%s>' % fn))
-            else:
-                print(('Unable to read data from file <%s>' % fn))
+            print(('Unable to read 2048 bytes from file <%s>' % fn))
             raise
         self.dfn = fn
         return
@@ -205,8 +153,7 @@ class brotherFile(object):
                 print(('   Pattern %3d: %3d Rows, %3d Stitches - ' % (patno, rows, stitches)))
             if flag != 0:
                 # valid entry
-                if methodWithPointers:
-                    pptr =  len(self.data) -1 - ((flag << 8) + unknown) 
+                pptr =  len(self.data) -1 - ((flag << 8) + unknown) 
                 memoff = pptr
                 if self.verbose:
                     print(("Memo #",patno, "offset ", memoff))

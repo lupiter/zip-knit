@@ -1,11 +1,11 @@
 #!/usr/bin/env python
 
 import sys
-import brother
+import pattern.file as brother
 from PIL import Image
 
-# import convenience functions from brother module
-from brother import roundfour, bytesForMemo, methodWithPointers
+# import convenience functions 
+from pattern.maths import roundfour, bytesForMemo
 
 TheImage = None
 
@@ -85,9 +85,9 @@ class PatternInserter:
         for r in range(height):
             row = []  # we'll chunk in bits and then put em into nibbles
             for s in range(width):
-                x = s if methodWithPointers else width-s-1
+                x = s
                 value = TheImage.getpixel((x,height-r-1))
-                isBlack = (value == 0) if methodWithPointers else (value != 0)
+                isBlack = (value == 0)
                 if (isBlack):
                     row.append(1)
                 else:

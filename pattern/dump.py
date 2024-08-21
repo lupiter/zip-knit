@@ -1,10 +1,10 @@
 #!/usr/bin/env python
 
 import sys
-import brother
+import pattern.file as brother
 
 # import convenience functions from brother module
-from brother import nibblesPerRow, bytesPerPattern, bytesForMemo
+from pattern.maths import nibblesPerRow, bytesPerPattern, bytesForMemo
 
 DEBUG = True
 

@@ -6,8 +6,8 @@ from .Messages import Messages
 from app.gui.Gui import Gui
 from PDDemulate.Drive import PDDemulator
 from PDDemulate.Listener import PDDEmulatorListener
-from dumppattern import PatternDumper
-from insertpattern import PatternInserter
+from pattern.dump import PatternDumper
+from pattern.insert import PatternInserter
 import tkinter
 import tkinter.filedialog
 import os

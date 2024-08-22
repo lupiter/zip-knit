@@ -6,24 +6,23 @@ class SerialConnection:
 
     def __init__(self, port: str) -> None:
         print("trying to open port: ", port)
-        if self.noserial is False:
-            self.ser = serial.Serial(
-                port=port,
-                baudrate=9600,
-                parity=serial.PARITY_NONE,
-                stopbits=serial.STOPBITS_ONE,
-                timeout=False,
-                xonxoff=False,
-                rtscts=False,
-                dsrdtr=False,
-            )
-            #            self.ser.setRTS(True)
-            if self.ser == None:
-                print("Unable to open serial device %s" % port)
-                raise IOError
+        self.ser = serial.Serial(
+            port=port,
+            baudrate=9600,
+            parity=serial.PARITY_NONE,
+            stopbits=serial.STOPBITS_ONE,
+            timeout=False,
+            xonxoff=False,
+            rtscts=False,
+            dsrdtr=False,
+        )
+        #            self.ser.setRTS(True)
+        if self.ser == None:
+            print("Unable to open serial device %s" % port)
+            raise IOError
         return
 
-    def __del__(self) -> None:
+    def close(self) -> None:
         if self.ser:
             self.ser.close()
         return

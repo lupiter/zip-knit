@@ -4,8 +4,8 @@
 from .Config import Config
 from .Messages import Messages
 from app.gui.Gui import Gui
-from PDDemulate.Drive import PDDemulator
 from PDDemulate.Listener import PDDEmulatorListener
+from PDDemulate.process import DiskProcess
 from pattern.dump import PatternDumper
 from pattern.insert import PatternInserter
 import tkinter
@@ -13,12 +13,16 @@ import tkinter.filedialog
 import os
 import os.path
 from PIL import Image
+import atexit
 
 
 class KnittingApp(tkinter.Tk):
+    emu: DiskProcess
+
 
     def __init__(self, parent=None) -> None:
         tkinter.Tk.__init__(self, parent)
+        self.emu = None
         self.parent = parent
         self.initialize()
         # self.startEmulator()
@@ -28,6 +32,8 @@ class KnittingApp(tkinter.Tk):
         self.patterns = []
         self.pattern = None
         self.currentDatFile = None
+        self.protocol("WM_DELETE_WINDOW", self.quitApplication)
+        atexit.register(self.quitApplication)
 
         self.initConfig()
         self.initializeUtilities()
@@ -51,14 +57,15 @@ class KnittingApp(tkinter.Tk):
         self.patternInserter.printErrorCallback = self.msg.showError
 
     def initEmulator(self) -> None:
-        self.emu = PDDemulator(self.getConfig().imgdir)
-        self.emu.listeners.append(PDDListener(self))
+        self.emu = DiskProcess(self.getConfig().imgdir, self.reloadPatternFile)
+        # self.emu = PDDemulator(self.getConfig().imgdir)
+        # self.emu.listeners.append(PDDListener(self))
         # self.emu = lambda: 1
         self.setEmulatorStarted(False)
 
     def emuButtonClicked(self) -> None:
         self.getConfig().device = self.deviceEntry.get()
-        if self.emu.started:
+        if self.emu.running:
             self.stopEmulator()
         else:
             self.startEmulator()
@@ -72,22 +79,23 @@ class KnittingApp(tkinter.Tk):
         else:
             try:
                 port = self.getConfig().device
-                self.emu.open(cport=port)
+                # self.emu.open(cport=port)
                 self.msg.showInfo("Emulation ready!")
                 self.setEmulatorStarted(True)
+                self.emu.start(port=port)
                 self.after_idle(self.emulatorLoop)
             except Exception as e:
                 self.msg.showError(
                     "Ensure that TFDI cable is connected to port "
-                    + port
+                    + self.getConfig().device
                     + "\n\nError: "
                     + str(e)
                 )
                 self.setEmulatorStarted(False)
 
     def emulatorLoop(self) -> None:
-        if self.emu.started:
-            self.emu.handleRequest(False)
+        if self.emu.running:
+            self.emu.queueCheck()
             # repeated call to after_idle() caused all window dialogs to hang out application, using after() each 10 milliseconds
             self.after(100, self.emulatorLoop)
         else:
@@ -95,20 +103,26 @@ class KnittingApp(tkinter.Tk):
 
     def stopEmulator(self) -> None:
         if self.emu is not None:
-            self.emu.close()
+            # self.emu.close()
+            self.emu.stop()
             self.msg.showInfo("PDDemulate stopped.")
             self.setEmulatorStarted(False)
         self.initEmulator()
 
     def quitApplication(self) -> None:
+        print("quit application")
         self.stopEmulator()
-        self.after_idle(self.quit)
+        self.emu.exit()
+        self.after(100, self.quit)
 
     def setEmulatorStarted(self, started) -> None:
-        self.emu.started = started
         if started:
+            if not self.emu.running:
+                self.emu.start(port=self.getConfig().device)
             self.gui.setEmuButtonStarted()
         else:
+            if self.emu.running:
+                self.emu.stop()
             self.gui.setEmuButtonStopped()
 
     def getConfig(self) -> Config:
@@ -156,7 +170,7 @@ class KnittingApp(tkinter.Tk):
         trackPath2 = os.path.join(self.config.imgdir, trackFile2)
         trackSize = 1024
 
-        startEmu = self.emu.started
+        startEmu = self.emu.running
         if startEmu:
             self.stopEmulator()
 
@@ -422,7 +436,7 @@ class PDDListener(PDDEmulatorListener):
     def __init__(self, app) -> None:
         self.app = app
 
-    def dataReceived(self, fullFilePath) -> None:
+    def dataReceived(self, fullFilePath: str) -> None:
         self.app.reloadPatternFile(fullFilePath)
 
 

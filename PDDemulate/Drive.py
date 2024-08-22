@@ -15,18 +15,22 @@ FORMAT_LENGTH = {
 }
 
 class PDDemulator:
-    serial: SerialConnection
+    serial: SerialConnection = None
+    listeners: list[PDDEmulatorListener] = []  # list of PDDEmulatorListener
+    FDCmode = False
+    disk: Disk
+    # bytes per logical sector
+    bpls = 1024
 
-    def __init__(self, basename, verbose=True):
-        self.listeners: list[PDDEmulatorListener] = []  # list of PDDEmulatorListener
+    def __init__(self, basename):
         self.disk = Disk(basename)
-        self.FDCmode = False
-        # bytes per logical sector
-        self.bpls = 1024
         return
     
     def open(self, cport="/dev/ttyUSB0") -> None:
         self.serial = SerialConnection(cport)
+
+    def isOpen(self) -> None:
+        return self.serial != None
 
     def close(self) -> None:
         self.serial = None

@@ -85,10 +85,7 @@ class PDDemulator:
         while True:
             self.handleRequest()
 
-    def handleRequest(self, blocking=True) -> None:
-        if not blocking:
-            if self.ser.in_waiting == 0:
-                return
+    def handleRequest(self) -> None:
         inc = self.serial.readchar()
         if self.FDCmode:
             self.__handleFDCmodeRequest(inc)
@@ -104,7 +101,7 @@ class PDDemulator:
                 print(f'Unknown op mode command: {hex(ord(inc))}')
 
     def __handleOpModeRequest(self) -> None:
-        req = ord(self.ser.read())
+        req = ord(self.serial.read())
         print(f"Request: {req}" )
         if req == 0x08:
             # Change to FDD emulation mode (no data returned)
@@ -327,7 +324,7 @@ class PDDemulator:
 
         # Stay in FDC mode
     
-    def __writeIdSection(self, check=False) -> None:
+    def __writeIdSection(self, withCheck=False) -> None:
         # Followed by physical sector number 0-79, defaults to 0
         # When received, send result status, if not error, wait
         # for data to be written, then after write, send status again
@@ -352,7 +349,7 @@ class PDDemulator:
         if more:
             self.__handleFDCmodeRequest(more)
 
-    def __writeLogicalSector(self, check=False) -> None:
+    def __writeLogicalSector(self, withCheck=False) -> None:
         info = self.__readFDDRequest()
         physical_sector, logical_sector = SerialConnection.getPhysicalLogicalSectorNumbers(info)
         print("FDC Write logical sector %d" % physical_sector)

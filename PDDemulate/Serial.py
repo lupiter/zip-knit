@@ -37,6 +37,9 @@ class SerialConnection:
             else:
                 break
         return
+    
+    def read(self) -> bytes:
+        return self.ser.read()
 
     def readsomechars(self, num: int) -> bytes:
         sch = self.ser.read(num)

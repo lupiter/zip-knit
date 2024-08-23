@@ -15,17 +15,21 @@ def run_disk(port: Queue, responses: Queue, imgdir: str) -> None:
     while True:
         try:
             newPort = port.get(block=False)
+            if newPort != device:
+                print(f"swapping port from {device} to {newPort}")
+                changed = True
+            else:
+                changed = False
             if newPort != None:
                 device = newPort
-            changed = True
         except Empty:
-            pass
+            changed = False
         if changed:
             if emu.isOpen():
                 emu.close()
             emu.open(device)
         if device != None:
-            emu.handleRequest(blocking=True)
+            emu.handleRequest()
         else:
             emu.close()
 

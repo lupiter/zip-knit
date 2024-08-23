@@ -13,7 +13,6 @@ import tkinter.filedialog
 import os
 import os.path
 from PIL import Image
-import atexit
 
 
 class KnittingApp(tkinter.Tk):
@@ -33,7 +32,7 @@ class KnittingApp(tkinter.Tk):
         self.pattern = None
         self.currentDatFile = None
         self.protocol("WM_DELETE_WINDOW", self.quitApplication)
-        atexit.register(self.quitApplication)
+        self.createcommand("::tk::mac::Quit", self.quitApplication)
 
         self.initConfig()
         self.initializeUtilities()

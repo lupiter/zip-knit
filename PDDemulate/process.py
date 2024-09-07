@@ -1,10 +1,10 @@
 from multiprocessing import Process, Queue
 from queue import Empty
 from typing import Callable
-
-from PDDemulate.Drive import PDDemulator
-from PDDemulate.Listener import PDDEmulatorListener
 import weakref
+
+from PDDemulate.drive import PDDemulator
+from PDDemulate.listener import PDDEmulatorListener
 
 
 def run_disk(port: Queue, responses: Queue, imgdir: str) -> None:
@@ -14,22 +14,22 @@ def run_disk(port: Queue, responses: Queue, imgdir: str) -> None:
     changed = False
     while True:
         try:
-            newPort = port.get(block=False)
-            if newPort != device:
-                print(f"swapping port from {device} to {newPort}")
+            new_port = port.get(block=False)
+            if new_port != device:
+                print(f"swapping port from {device} to {new_port}")
                 changed = True
             else:
                 changed = False
-            if newPort != None:
-                device = newPort
+            if new_port is not None:
+                device = new_port
         except Empty:
             changed = False
         if changed:
             if emu.isOpen():
                 emu.close()
             emu.open(device)
-        if device != None:
-            emu.handleRequest()
+        if device is not None:
+            emu.handle_request()
         else:
             emu.close()
 
@@ -46,33 +46,37 @@ class DiskProcessListener(PDDEmulatorListener):
 
 class DiskProcess:
     process: Process
-    portQueue: Queue
+    port_queue: Queue
     responses: Queue
     callback: Callable[[str], None]
     running: False
 
     def __init__(self, imgdir: str, callback: Callable[[str], None]) -> None:
-        self.portQueue = Queue(10)
+        self.port_queue = Queue(10)
         self.responses = Queue(10)
-        self.process = Process(target=run_disk, args=[self.portQueue, self.responses, imgdir])
+        self.process = Process(
+            target=run_disk, args=[self.port_queue, self.responses, imgdir]
+        )
         self.callback = callback
         self.running = False
-        self._finalizer = weakref.finalize(self, self.__exit, self.process, self.portQueue, self.responses)
+        self._finalizer = weakref.finalize(
+            self, self.__exit, self.process, self.port_queue, self.responses
+        )
 
     def exit(self) -> None:
         self._finalizer()
 
-    def __exit(self, process: Process, inQueue: Queue, outQueue: Queue) -> None:
+    def __exit(self, process: Process, in_queue: Queue, out_queue: Queue) -> None:
         print("exit")
-        inQueue.close()
-        outQueue.close()
+        in_queue.close()
+        out_queue.close()
         if process.is_alive():
             process.terminate()
         process.close()
 
     def start(self, port: str) -> None:
         self.running = True
-        self.portQueue.put(port)
+        self.port_queue.put(port)
         if not self.process.is_alive():
             self.process.start()
 
@@ -80,9 +84,9 @@ class DiskProcess:
         if self.running:
             self.running = False
             if self.process.is_alive():
-                self.portQueue.put(None)
+                self.port_queue.put(None)
 
-    def queueCheck(self) -> None:
+    def queue_check(self) -> None:
         while True:
             try:
                 message = self.responses.get(block=False)

@@ -1,124 +1,126 @@
-from tkinter import *
-from tkinter.ttk import *
+from tkinter import StringVar, VERTICAL, RIGHT, LEFT, Listbox, Canvas, BOTH, END, Tk, Y
+from tkinter.ttk import Button, Label, Entry, Frame, Scrollbar
 from tkinter.ttk import Style
 
-from app.gui import Devices
+from app.gui.devices import Devices
 
 
-class Gui:
-    def initializeMainWindow(self, w) -> None:
-        self.initMainWindow(w)
+class Gui: # pylint: disable=too-many-instance-attributes
+    """Manager for the UI setting up the buttons and layout"""
+    __max_columns = 1000
+    __max_rows = 1000
+    __row = 0
+    main_window: Tk
 
-        self._maxColumns = 1000
-        self._maxRows = 1000
-        self._row = 0
-        self.createDeviceWidgets()
-        self.createEmulatorButton()
+    def __init__(self, window: Tk) -> None:
+        self.__init_main_window(window)
+        self.__create_device_widgets()
+        self.__create_emulator_button()
 
-        self._row += 1
-        self.createDatFileWidgets()
+        self.__row += 1
+        self.__create_dat_file_widgets()
 
-        self._row += 1
-        self.createPatternsPanel()
+        self.__row += 1
+        self.__create_patterns_panel()
 
-        self._row += 1
-        self.createInfoMessagesLabel()
+        self.__row += 1
+        self.__create_info_messages_label()
 
-    def initMainWindow(self, mainWindow) -> None:
-        self.mainWindow = mainWindow
-        self.mainWindow.title("Zip Knit")
-        self.mainWindow.geometry("800x600")
-        self.mainWindow.grid()
-        self.mainWindow.grid_columnconfigure(1, weight=10)
-        self.mainWindow.grid_columnconfigure(2, weight=1)
-        self.mainWindow.resizable(True, True)
+    def __init_main_window(self, main_window: Tk) -> None:
+        self.main_window = main_window
+        self.main_window.title("Zip Knit")
+        self.main_window.geometry("800x600")
+        self.main_window.grid()
+        self.main_window.grid_columnconfigure(1, weight=10)
+        self.main_window.grid_columnconfigure(2, weight=1)
+        self.main_window.resizable(True, True)
 
-    def createDeviceWidgets(self) -> None:
-        label = Label(self.mainWindow, text="Device:")
-        label.grid(column=0, row=self._row, sticky="E", pady=5, padx=5)
+    def __create_device_widgets(self) -> None:
+        label = Label(self.main_window, text="Device:")
+        label.grid(column=0, row=self.__row, sticky="E", pady=5, padx=5)
 
-        self.mainWindow.deviceEntry = Devices.Devices(self.mainWindow, self._row, 1)
+        self.main_window.deviceEntry = Devices(self.main_window, self.__row, 1)
 
         # entryText = StringVar()
         # self.mainWindow.deviceEntry = Entry(self.mainWindow, textvariable=entryText)
         # self.mainWindow.deviceEntry.grid(column=1,row=self._row,sticky='EW')
         # self.mainWindow.deviceEntry.entryText = entryText
 
-    def createEmulatorButton(self) -> None:
+    def __create_emulator_button(self) -> None:
         caption = StringVar()
-        self.emuButton = Button(
-            self.mainWindow,
+        self.emu_button = Button(
+            self.main_window,
             textvariable=caption,
-            command=self.mainWindow.emuButtonClicked,
+            command=self.main_window.emuButtonClicked,
         )
-        self.emuButton.caption = caption
-        self.emuButton.grid(column=2, row=self._row, columnspan=2, sticky="EW")
-        self.setEmuButtonStopped()
+        self.emu_button.caption = caption
+        self.emu_button.grid(column=2, row=self.__row, columnspan=2, sticky="EW")
+        self.set_emu_button_stopped()
 
         but = Button(
-            self.mainWindow, text="Help...", command=self.mainWindow.helpButtonClicked
+            self.main_window, text="Help...", command=self.main_window.helpButtonClicked
         )
-        but.grid(column=4, row=self._row, sticky="E", padx=5, pady=5)
+        but.grid(column=4, row=self.__row, sticky="E", padx=5, pady=5)
 
-    def createDatFileWidgets(self) -> None:
-        label = Label(self.mainWindow, text="Dat file:")
-        label.grid(column=0, row=self._row, sticky="E", padx=5)
+    def __create_dat_file_widgets(self) -> None:
+        label = Label(self.main_window, text="Dat file:")
+        label.grid(column=0, row=self.__row, sticky="E", padx=5)
 
-        entryText = StringVar()
-        self.mainWindow.datFileEntry = Entry(self.mainWindow, textvariable=entryText)
-        self.mainWindow.datFileEntry.grid(column=1, row=self._row, sticky="EW")
-        self.mainWindow.datFileEntry.entryText = entryText
+        entry_text = StringVar()
+        self.main_window.datFileEntry = Entry(self.main_window, textvariable=entry_text)
+        self.main_window.datFileEntry.grid(column=1, row=self.__row, sticky="EW")
+        self.main_window.datFileEntry.entryText = entry_text
 
-        self.chooseDatFileButton = Button(
-            self.mainWindow,
+        self.choose_dat_file_button = Button(
+            self.main_window,
             text="...",
-            command=self.mainWindow.chooseDatFileButtonClicked,
+            command=self.main_window.chooseDatFileButtonClicked,
         )
-        self.chooseDatFileButton.grid(column=2, row=self._row, sticky="W")
+        self.choose_dat_file_button.grid(column=2, row=self.__row, sticky="W")
 
-        self.reloadDatFileButton = Button(
-            self.mainWindow,
+        self.reload_dat_file_button = Button(
+            self.main_window,
             text="Reload file",
-            command=self.mainWindow.reloadDatFileButtonClicked,
+            command=self.main_window.reloadDatFileButtonClicked,
         )
-        self.reloadDatFileButton.grid(column=3, row=self._row, sticky="EW")
+        self.reload_dat_file_button.grid(column=3, row=self.__row, sticky="EW")
 
         but = Button(
-            self.mainWindow,
+            self.main_window,
             text="Store track",
-            command=self.mainWindow.storeTrackButtonClicked,
+            command=self.main_window.storeTrackButtonClicked,
         )
-        but.grid(column=4, row=self._row, sticky="EW", padx=5)
-        self.storeTrackButton = but
+        but.grid(column=4, row=self.__row, sticky="EW", padx=5)
+        self.store_track_button = but
 
-    def createInfoMessagesLabel(self) -> None:
-        labelText = StringVar()
+    def __create_info_messages_label(self) -> None:
+        label_text = StringVar()
         style = Style()
         style.configure("BW.TLabel", foreground="white", background="blue")
 
         label = Label(
-            self.mainWindow, anchor="w", style="BW.TLabel", textvariable=labelText
+            self.main_window, anchor="w", style="BW.TLabel", textvariable=label_text
         )
-        label.grid(column=0, row=self._row, columnspan=self._maxColumns, sticky="EW")
-        label.caption = labelText
-        self.mainWindow.infoLabel = label
+        label.grid(column=0, row=self.__row, columnspan=self.__max_columns, sticky="EW")
+        label.caption = label_text
+        self.main_window.infoLabel = label
 
-    def createPatternsPanel(self) -> None:
-        patternFrame = Frame(self.mainWindow)
-        patternFrame.grid(
-            column=0, row=self._row, columnspan=self._maxColumns, sticky="EWNS"
+    def __create_patterns_panel(self) -> None:
+        pattern_frame = Frame(self.main_window)
+        pattern_frame.grid(
+            column=0, row=self.__row, columnspan=self.__max_columns, sticky="EWNS"
         )
-        self.mainWindow.grid_rowconfigure(self._row, weight=1)
-        patternFrame.grid_columnconfigure(0, weight=0)
-        patternFrame.grid_columnconfigure(1, weight=1)
-        patternFrame.grid_rowconfigure(1, weight=1)
+        self.main_window.grid_rowconfigure(self.__row, weight=1)
+        pattern_frame.grid_columnconfigure(0, weight=0)
+        pattern_frame.grid_columnconfigure(1, weight=1)
+        pattern_frame.grid_rowconfigure(1, weight=1)
 
-        listboxFrame = Frame(patternFrame)
-        listboxFrame.grid(column=0, row=0, sticky="EWNS", rowspan=self._maxRows)
-        scrollbar = Scrollbar(listboxFrame, orient=VERTICAL)
+        listbox_frame = Frame(pattern_frame)
+        listbox_frame.grid(column=0, row=0, sticky="EWNS", rowspan=self.__max_rows)
+        scrollbar = Scrollbar(listbox_frame, orient=VERTICAL)
         listvar = StringVar()
         lb = Listbox(
-            listboxFrame,
+            listbox_frame,
             listvariable=listvar,
             exportselection=0,
             width=40,
@@ -128,62 +130,67 @@ class Gui:
         lb.items = ListboxVar(lb, listvar)
         scrollbar.pack(side=RIGHT, fill=Y)
         lb.pack(side=LEFT, fill=BOTH, expand=1)
-        self.mainWindow.patternListBox = lb
+        self.main_window.patternListBox = lb
 
         textvar = StringVar()
-        label = Label(patternFrame, anchor="w", textvariable=textvar)
+        label = Label(pattern_frame, anchor="w", textvariable=textvar)
         label.grid(column=1, row=0, sticky="EW")
         label.caption = textvar
-        self.mainWindow.patternTitle = label
+        self.main_window.patternTitle = label
 
-        self.insertBitmapButton = Button(
-            patternFrame,
+        self.insert_bitmap_button = Button(
+            pattern_frame,
             text="Insert bitmap...",
-            command=self.mainWindow.insertBitmapButtonClicked,
+            command=self.main_window.insertBitmapButtonClicked,
         )
-        self.insertBitmapButton.grid(column=2, row=0, sticky="EW")
+        self.insert_bitmap_button.grid(column=2, row=0, sticky="EW")
 
-        self.exportBitmapButton = Button(
-            patternFrame,
+        self.export_bitmap_button = Button(
+            pattern_frame,
             text="Export bitmap...",
-            command=self.mainWindow.exportBitmapButtonClicked,
+            command=self.main_window.exportBitmapButtonClicked,
         )
-        self.exportBitmapButton.grid(column=3, row=0, sticky="EW")
+        self.export_bitmap_button.grid(column=3, row=0, sticky="EW")
 
-        pc = ExtendedCanvas(patternFrame, bg="white")
+        pc = ExtendedCanvas(pattern_frame, bg="white")
         pc.grid(column=1, row=1, sticky="EWNS", columnspan=3)
-        self.mainWindow.patternCanvas = pc
+        self.main_window.patternCanvas = pc
 
-    def setEmuButtonStopped(self) -> None:
-        b = self.emuButton
+    def set_emu_button_stopped(self) -> None:
+        b = self.emu_button
         b.caption.set("Start emulator")
 
-    def setEmuButtonStarted(self) -> None:
-        b = self.emuButton
+    def set_emu_button_started(self) -> None:
+        b = self.emu_button
         b.caption.set("Stop emulator")
 
 
-class ExtendedCanvas(Canvas):
-
-    def getWidth(self) -> int:
+class ExtendedCanvas(Canvas): # pylint: disable=too-many-ancestors
+    """Canvas, with convenience method to clear it"""
+    def get_width(self) -> int:
+        """Width in pixels"""
         w = self.winfo_width()
         return w
 
-    def getHeight(self) -> int:
+    def get_height(self) -> int:
+        """Height in pixels"""
         h = self.winfo_height()
         return h
 
     def clear(self) -> None:
+        """Empty the canvas"""
         maxsize = 10000
         self.create_rectangle(0, 0, maxsize, maxsize, width=0, fill=self.cget("bg"))
 
 
-class ListboxVar:
+class ListboxVar: # pylint: disable=too-few-public-methods
+    """Items for showing in a Listbox"""
     def __init__(self, listbox, stringvar) -> None:
         self._stringvar = stringvar
         self._listbox = listbox
 
-    def set(self, list) -> None:
+    def set(self, items) -> None:
+        """Replace everything"""
         self._listbox.delete(0, END)
-        for item in list:
+        for item in items:
             self._listbox.insert(END, item)

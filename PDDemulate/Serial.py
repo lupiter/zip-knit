@@ -17,8 +17,8 @@ class SerialConnection:
             dsrdtr=False,
         )
         #            self.ser.setRTS(True)
-        if self.ser == None:
-            print("Unable to open serial device %s" % port)
+        if self.ser is None:
+            print(f"Unable to open serial device {port}")
             raise IOError
         return
 
@@ -27,38 +27,38 @@ class SerialConnection:
             self.ser.close()
         return
 
-    def dumpchars(self) -> None:
+    def dump_chars(self) -> None:
         num = 1
         while 1:
             inc = self.ser.read()
             if len(inc) != 0:
-                print("flushed 0x%02X (%d)" % (ord(inc), num))
+                print(f"flushed 0x{ord(inc)}X ({num})")
                 num = num + 1
             else:
                 break
         return
-    
+
     def read(self) -> bytes:
         return self.ser.read()
 
-    def readsomechars(self, num: int) -> bytes:
+    def read_some_chars(self, num: int) -> bytes:
         sch = self.ser.read(num)
         while len(sch) < num:
             sch += self.ser.read(num - len(sch))
         return sch
 
-    def readchar(self) -> bytes:
+    def read_char(self) -> bytes:
         inc = ""
         while len(inc) == 0:
             inc = self.ser.read()
         return inc
 
-    def writebytes(self, b: bytes) -> None:
+    def write_bytes(self, b: bytes) -> None:
         self.ser.write(b)
         return
-    
+
     @staticmethod
-    def getPhysicalLogicalSectorNumbers(info: list[bytes]) -> tuple[int, int]:
+    def get_physical_logical_sector_numbers(info: list[bytes]) -> tuple[int, int]:
         physical = 0
         logical = 1
         if len(info) >= 1 and info[0] != b"":

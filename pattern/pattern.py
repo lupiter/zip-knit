@@ -21,7 +21,3 @@ class PatternMetadata:
         self.memo_offset = memo_offset
         self.pattern_offset = pattern_offset
         self.pattern_end_offset = pattern_end_offset
-
-    
-
-

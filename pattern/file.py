@@ -1,5 +1,4 @@
 import array  # type: ignore
-import typing
 from pattern.maths import (
     nibbles,
     nibbles_per_row,
@@ -121,7 +120,7 @@ class BrotherFile(): # pylint: disable=too-many-public-methods
                 row.append((nib & 0x08) >> 3)
                 stitches = stitches - 1
         return row
-    
+
     def get_pattern(self, pattern_number: int) -> PatternMetadata | None:
         """
         Get information for a single pattern.

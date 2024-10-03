@@ -13,7 +13,7 @@ class Devices:
         self.parent = parent
         self.label = StringVar()
 
-        self.options = [port for port in serial.tools.list_ports.comports()]
+        self.options = list(serial.tools.list_ports.comports())
 
         if len(self.options) == 0:
             self.options.append("No devices found")
@@ -26,7 +26,7 @@ class Devices:
 
     def scan(self):
         """Refresh the list of available devices"""
-        self.options = [port for port in serial.tools.list_ports.comports()]
+        self.options = list(serial.tools.list_ports.comports())
 
     def get(self) -> ListPortInfo:
         """Currently selected device"""

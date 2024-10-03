@@ -70,8 +70,6 @@ class DiskSector:
             print(f"Unable to handle id file <{fn}>")
             raise
 
-        return
-
     def __del__(self):
         return
 
@@ -85,13 +83,11 @@ class DiskSector:
         self.df.seek(0)
         self.df.write(self.data)
         self.df.flush()
-        return
 
     def write_id_file(self) -> None:
         self.idf.seek(0)
         self.idf.write(self.id)
         self.idf.flush()
-        return
 
     def read(self, length: int) -> bytes:
         if length != self.sector_size:
@@ -107,7 +103,6 @@ class DiskSector:
             raise IOError
         self.data = indata
         self.write_d_file()
-        return
 
     def get_sector_id(self) -> bytes:
         return self.id
@@ -125,7 +120,6 @@ class DiskSector:
         self.write_id_file()
         print("Wrote New ID: ", end=" ")
         self.dump_id()
-        return
 
     def dump_id(self) -> None:
         print(f"{self.id}")

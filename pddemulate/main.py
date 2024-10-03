@@ -3,15 +3,15 @@
 # meat and potatos here
 
 import sys
-from PDDemulate.Drive import PDDemulator
+from pddemulate.drive import PDDemulator
 
-version = "2.0"
+VERSION = "2.0"
 
 
 if __name__ == "__main__":
     if len(sys.argv) < 3:
-        print("%s version %s" % (sys.argv[0], version))
-        print("Usage: %s basedir serialdevice" % sys.argv[0])
+        print(f"{sys.argv[0]} version {VERSION}")
+        print(f"Usage: {sys.argv[0]} basedir serialdevice")
         sys.exit()
 
     print("Preparing . . . Please Wait")
@@ -22,7 +22,7 @@ if __name__ == "__main__":
     print("Emulator Ready!")
     try:
         while True:
-            emu.handleRequests()
+            emu.handle_requests()
     except KeyboardInterrupt:
         pass
 

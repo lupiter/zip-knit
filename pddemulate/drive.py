@@ -1,8 +1,8 @@
 from array import array  # type: ignore
 
-from PDDemulate.disk import Disk
-from PDDemulate.listener import PDDEmulatorListener
-from PDDemulate.serial import SerialConnection
+from pddemulate.disk import Disk
+from pddemulate.listener import PDDEmulatorListener
+from pddemulate.serial import SerialConnection
 
 FORMAT_LENGTH = {
     b"0": 64,
@@ -25,7 +25,6 @@ class PDDemulator:
 
     def __init__(self, basename):
         self.disk = Disk(basename)
-        return
 
     def open(self, cport="/dev/ttyUSB0") -> None:
         self.serial = SerialConnection(cport)
@@ -44,10 +43,9 @@ class PDDemulator:
             inc = self.serial.read_char()
             if inc == b"\r":
                 break
-            elif inc == b" ":
+            if inc == b" ":
                 continue
-            else:
-                inbuf.append(inc)
+            inbuf.append(inc)
 
         all_data = b"".join(inbuf)
         rv = all_data.split(b",")
@@ -109,7 +107,6 @@ class PDDemulator:
                 self.fdc_mode = True
         else:
             print(f"Invalid OpMode request code {req} received")
-        return
 
     def __handle_fdc_mode_request(self, cmd: bytes) -> None:
         # Commands may be followed by an optional space

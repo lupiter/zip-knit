@@ -20,12 +20,10 @@ class SerialConnection:
         if self.ser is None:
             print(f"Unable to open serial device {port}")
             raise IOError
-        return
 
     def close(self) -> None:
         if self.ser:
             self.ser.close()
-        return
 
     def dump_chars(self) -> None:
         num = 1
@@ -36,7 +34,6 @@ class SerialConnection:
                 num = num + 1
             else:
                 break
-        return
 
     def read(self) -> bytes:
         return self.ser.read()
@@ -55,7 +52,6 @@ class SerialConnection:
 
     def write_bytes(self, b: bytes) -> None:
         self.ser.write(b)
-        return
 
     @staticmethod
     def get_physical_logical_sector_numbers(info: list[bytes]) -> tuple[int, int]:

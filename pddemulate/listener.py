@@ -1,5 +1,4 @@
 
 class PDDEmulatorListener:
-    def dataReceived(self, fullFilePath: str):
+    def data_received(self, full_file_path: str):
         pass
-

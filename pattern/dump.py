@@ -35,11 +35,10 @@ class PatternDumper: # pylint: disable=too-few-public-methods
             pats = bf.get_patterns(patt)
             if len(pats) == 0:
                 raise PatternNotFoundException(patt)
-            else:
-                stitches = pats[0]["stitches"]
-                rows = pats[0]["rows"]
-                print(f'{stitches} Stitches, {rows} Rows')
-                result.pattern = bf.get_pattern(patt)
+            stitches = pats[0]["stitches"]
+            rows = pats[0]["rows"]
+            print(f'{stitches} Stitches, {rows} Rows')
+            result.pattern = bf.get_pattern(patt)
         return result
 
     def __pattern_print(self, bf: BrotherFile):

@@ -27,7 +27,7 @@ class Disk:
                     f"Directory <{dirpath}> exists but cannot be accessed, check permissions"
                 )
                 raise IOError
-            elif not os.path.isdir(dirpath):
+            if not os.path.isdir(dirpath):
                 print(f"Specified path <{dirpath}> exists but is not a directory")
                 raise IOError
         else:
@@ -43,7 +43,6 @@ class Disk:
             fname = os.path.join(dirpath, i)
             ds = DiskSector(fname)
             self.sectors.append(ds)
-        return
 
     def __del__(self):
         return
@@ -51,7 +50,6 @@ class Disk:
     def format(self) -> None:
         for i in range(self.num_sectors):
             self.sectors[i].format()
-        return
 
     def find_sector_id(self, psn: int, sector_id: bytes) -> bytes:
         for i in range(psn, self.num_sectors):
@@ -65,7 +63,6 @@ class Disk:
 
     def set_sector_id(self, psn: int, sector_id: bytes) -> None:
         self.sectors[psn].set_sector_id(sector_id)
-        return
 
     def write_sector(self, psn: int, lsn: int, indata: bytes) -> None:
         self.sectors[psn].write(indata)
@@ -80,7 +77,6 @@ class Disk:
             cmd = f"cat {fn1} {fn2} > {outfn}"
             os.system(cmd)
             self.last_dat_file_path = outfn
-        return
 
     def read_sector(self, psn: int, lsn: int) -> bytes:
         return self.sectors[psn].read(1024)

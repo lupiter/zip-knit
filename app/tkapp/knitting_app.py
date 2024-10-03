@@ -7,8 +7,8 @@ import os
 import os.path
 from PIL import Image
 
-from PDDemulate.drive import PDDemulator
-from PDDemulate.listener import PDDEmulatorListener
+from pddemulate.drive import PDDemulator
+from pddemulate.listener import PDDEmulatorListener
 from pattern.dump import PatternDumper
 from pattern.insert import PatternInserter
 
@@ -44,8 +44,8 @@ class KnittingApp(tkinter.Tk): # pylint: disable=too-many-instance-attributes
         self.pattern_dumper = PatternDumper()
         self.pattern_dumper.print_info_callback = self.msg.show_info
         self.pattern_inserter = PatternInserter()
-        self.pattern_inserter.printInfoCallback = self.msg.show_info
-        self.pattern_inserter.printErrorCallback = self.msg.show_error
+        self.pattern_inserter.print_info_callback = self.msg.show_info
+        self.pattern_inserter.print_error_callback = self.msg.show_error
         self.after_idle(self.reload_pattern_file)
 
     def emu_button_clicked(self) -> None:
@@ -153,41 +153,33 @@ class KnittingApp(tkinter.Tk): # pylint: disable=too-many-instance-attributes
         if start_emu:
             self.__stop_emulator()
 
-        infile = track0file = track1file = None
+        with open(path_to_file, "rb") as infile:
+            try:
+                with open(track_path_1, "wb") as track0file, open(track_path_2, "wb") as track1file:
+                    t0dat = infile.read(track_size)
+                    t1dat = infile.read(track_size)
 
-        infile = open(path_to_file, "rb")
-
-        try:
-            track0file = open(track_path_1, "wb")
-            track1file = open(track_path_2, "wb")
-
-            t0dat = infile.read(track_size)
-            t1dat = infile.read(track_size)
-
-            track0file.write(t0dat)
-            track1file.write(t1dat)
-            self.msg.show_info(
-                "Stored file to tracks "
-                + track_file_1
-                + " and "
-                + track_file_2
-                + " in "
-                + self.config.imgdir
-            )
-        except IOError as e:
-            self.msg.show_error(str(e))
-        finally:
-            if infile:
-                self.msg.show_debug("Closing infile...")
-                infile.close()
-            if track0file:
-                self.msg.show_debug("Closing track0file...")
-                track0file.close()
-            if track1file:
-                self.msg.show_debug("Closing track1file...")
-                track1file.close()
-            if start_emu:
-                self.start_emulator()
+                    track0file.write(t0dat)
+                    track1file.write(t1dat)
+                    self.msg.show_info(
+                        "Stored file to tracks "
+                        + track_file_1
+                        + " and "
+                        + track_file_2
+                        + " in "
+                        + self.config.imgdir
+                    )
+            except IOError as e:
+                self.msg.show_error(str(e))
+            finally:
+                if infile:
+                    self.msg.show_debug("Closing infile...")
+                if track0file:
+                    self.msg.show_debug("Closing track0file...")
+                if track1file:
+                    self.msg.show_debug("Closing track1file...")
+                if start_emu:
+                    self.start_emulator()
 
     def help_button_clicked(self) -> None:
         help_msg = """Commands to execute on Knitting machine:
@@ -228,8 +220,7 @@ class KnittingApp(tkinter.Tk): # pylint: disable=too-many-instance-attributes
         sel = self.patternListBox.curselection()
         if len(sel) > 0:
             return int(sel[0])
-        else:
-            return None
+        return None
 
     def __set_selected_pattern_index(self, index) -> None:
         lb = self.patternListBox
@@ -268,8 +259,7 @@ class KnittingApp(tkinter.Tk): # pylint: disable=too-many-instance-attributes
                 + str(p["stitches"])
                 + ")"
             )
-        else:
-            return "No pattern"
+        return "No pattern"
 
     def __print_pattern_on_canvas(self, pattern) -> None:
         #        pattern = []
@@ -412,11 +402,11 @@ class KnittingApp(tkinter.Tk): # pylint: disable=too-many-instance-attributes
 
 class PDDListener(PDDEmulatorListener): # pylint: disable=too-few-public-methods
 
-    def __init__(self, inner_app) -> None:
+    def __init__(self, inner_app: KnittingApp) -> None:
         self.app = inner_app
 
-    def dataReceived(self, fullFilePath) -> None:
-        self.app.reloadPatternFile(fullFilePath)
+    def data_received(self, full_file_path) -> None:
+        self.app.reload_pattern_file(full_file_path)
 
 
 if __name__ == "__main__":

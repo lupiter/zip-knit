@@ -3,8 +3,8 @@ from queue import Empty
 from typing import Callable
 import weakref
 
-from PDDemulate.drive import PDDemulator
-from PDDemulate.listener import PDDEmulatorListener
+from pddemulate.drive import PDDemulator
+from pddemulate.listener import PDDEmulatorListener
 
 
 def run_disk(port: Queue, responses: Queue, imgdir: str) -> None:
@@ -40,8 +40,8 @@ class DiskProcessListener(PDDEmulatorListener):
     def __init__(self, queue: Queue) -> None:
         self.queue = queue
 
-    def dataReceived(self, fullFilePath: str):
-        self.queue.put(fullFilePath)
+    def data_received(self, full_file_path: str):
+        self.queue.put(full_file_path)
 
 
 class DiskProcess:

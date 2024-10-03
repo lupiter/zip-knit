@@ -54,17 +54,16 @@ class BrotherFile(): # pylint: disable=too-many-public-methods
         self.data: bytes
         self.verbose = False
         try:
-            self.df = open(fn, "rb+")  # YOU MUST HAVE BINARY FORMAT!!!
+            with open(fn, "rb+") as df:
+                try:
+                    self.data = df.read(-1)
+                    if len(self.data) == 0:
+                        raise FileNotFoundError("The file has no data")
+                except:
+                    print(f"Unable to read 2048 bytes from file <{fn}>")
+                    raise
         except:
             print(f"Unable to open brother file <{fn}>")
-            raise
-        try:
-            self.data = self.df.read(-1)
-            self.df.close()
-            if len(self.data) == 0:
-                raise FileNotFoundError("The file has no data")
-        except:
-            print(f"Unable to read 2048 bytes from file <{fn}>")
             raise
         self.dfn = fn
 
@@ -99,8 +98,7 @@ class BrotherFile(): # pylint: disable=too-many-public-methods
         m, l = nibbles(self.data[offset - byte_data])
         if nibble % 2:
             return m
-        else:
-            return l
+        return l
 
     def get_row_data(self, patt_offset: int, stitches: int, rownumber: int) -> bytes:
         row = array.array("B")

@@ -8,6 +8,7 @@ from pattern.maths import (
     roundeven,
     hto,
 )
+from pattern.pattern import PatternMetadata
 
 __version__ = "1.0"
 
@@ -120,8 +121,27 @@ class BrotherFile(): # pylint: disable=too-many-public-methods
                 row.append((nib & 0x08) >> 3)
                 stitches = stitches - 1
         return row
+    
+    def get_pattern(self, pattern_number: int) -> PatternMetadata | None:
+        """
+        Get information for a single pattern.
+        Pattern information is stored at the beginning
+        of the file, with seven bytes per pattern and
+        99 possible patterns, numbered 901-999.
+        Returns: A tuple:
+          patternNumber
+          stitches
+          rows
+          patternOffset
+          memoOffset
+        """
+        patterns = self.get_patterns()
+        for pattern in patterns:
+            if pattern.number == pattern_number:
+                return pattern
+        return None
 
-    def get_patterns(self, pattern_number: typing.Optional[int] = None) -> list[dict]:
+    def get_patterns(self) -> list[PatternMetadata]:
         """
         Get a list of custom patterns stored in the file, or
         information for a single pattern.
@@ -135,7 +155,7 @@ class BrotherFile(): # pylint: disable=too-many-public-methods
           patternOffset
           memoOffset
         """
-        patlist: list[dict] = []
+        patlist: list[PatternMetadata] = []
         idx = 0
         pptr = INIT_PATTERN_OFFSET
         for pi in range(1, 100):
@@ -175,29 +195,9 @@ class BrotherFile(): # pylint: disable=too-many-public-methods
                 pptr = pptr - bytes_per_pattern_and_memo(stitches, rows)
                 if self.verbose:
                     print(("Ending offset ", hex(pptr)))
-                if pattern_number:
-                    if pattern_number == patno:
-                        patlist.append(
-                            {
-                                "number": patno,
-                                "stitches": stitches,
-                                "rows": rows,
-                                "memo": memoff,
-                                "pattern": patoff,
-                                "pattend": pptr,
-                            }
-                        )
-                else:
-                    patlist.append(
-                        {
-                            "number": patno,
-                            "stitches": stitches,
-                            "rows": rows,
-                            "memo": memoff,
-                            "pattern": patoff,
-                            "pattend": pptr,
-                        }
-                    )
+                patlist.append(
+                    PatternMetadata(patno, stitches, rows, memoff, patoff, pptr)
+                )
             else:
                 break
         return patlist
@@ -225,12 +225,12 @@ class BrotherFile(): # pylint: disable=too-many-public-methods
         is the same length as the number of rows
         in the pattern.
         """
-        pattern_list = self.get_patterns(pattern_number)
-        if len(pattern_list) == 0:
+        pattern = self.get_pattern(pattern_number)
+        if pattern is None:
             return None
         memos = array.array("B")
-        memo_off = pattern_list[0]["memo"]
-        rows = pattern_list[0]["rows"]
+        memo_off = pattern.memo
+        rows = pattern.rows
         memlen = roundeven(rows) / 2
         # memo is padded to en even byte
         for i in range(memo_off, memo_off - memlen, -1):
@@ -242,19 +242,17 @@ class BrotherFile(): # pylint: disable=too-many-public-methods
                 rows = rows - 1
         return memos
 
-    def get_pattern(self, pattern_number: int) -> bytearray:
+    def get_pattern_data(self, pattern_number: int) -> bytearray:
         """
         Return an array containing the pattern
         information for a pattern.
         """
-        pattern_list = self.get_patterns(pattern_number)
-        if len(pattern_list) == 0:
-            return None
+        pattern_meta = self.get_pattern(pattern_number)
         pattern = []
 
-        patoff = int(pattern_list[0]["pattern"])
-        rows = pattern_list[0]["rows"]
-        stitches = pattern_list[0]["stitches"]
+        patoff = int(pattern_meta.pattern_offset)
+        rows = pattern_meta.rows
+        stitches = pattern_meta.stitches
 
         # print 'patoff = 0x%04X' % patoff
         # print 'rows = ', rows

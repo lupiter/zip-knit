@@ -16,6 +16,11 @@ from app.gui.gui import Gui
 from app.tkapp.config import Config
 from app.tkapp.messages import Messages
 
+class Point:
+    def __init__(self, x, y) -> None:
+        self.x = x
+        self.y = y
+
 
 class KnittingApp(tkinter.Tk): # pylint: disable=too-many-instance-attributes
 
@@ -270,25 +275,25 @@ class KnittingApp(tkinter.Tk): # pylint: disable=too-many-instance-attributes
         #            pattern.append(row)
         pattern_height = len(pattern)
         pattern_width = len(pattern[0])
-        marginx, marginy = 10, 10
-        bit_width = (self.patternCanvas.getWidth() - marginx) / (pattern_width)
-        bit_height = (self.patternCanvas.getHeight() - marginy) / (pattern_height)
+        margin = Point(10, 10)
+        bit_width = (self.patternCanvas.getWidth() - margin.x) / (pattern_width)
+        bit_height = (self.patternCanvas.getHeight() - margin.y) / (pattern_height)
         bit_width = min(bit_width, bit_height)
         bit_height = bit_width
-        self.__print_pattern_body(pattern, marginx, marginy, bit_width, bit_height)
-        sec_coord_big, sec_coord_small, sec_coord_2 = 0, marginy / 2, marginy
+        self.__print_pattern_body(pattern, margin, bit_width, bit_height)
+        sec_coord_big, sec_coord_small, sec_coord_2 = 0, margin.y / 2, margin.y
         step, big_step = 5, 10
         for i in range(0, max(pattern_width, pattern_height) + 1, step):
             sec_coord = sec_coord_big if i % big_step == 0 else sec_coord_small
             if i < pattern_width:
-                x_coord = marginx + i * bit_width
+                x_coord = margin.x + i * bit_width
                 self.patternCanvas.create_line(x_coord, sec_coord, x_coord, sec_coord_2)
             if i < pattern_height:
-                y_coord = marginx + i * bit_height
+                y_coord = margin.x + i * bit_height
                 self.patternCanvas.create_line(sec_coord, y_coord, sec_coord_2, y_coord)
 
     def __print_pattern_body(
-        self, pattern, pattern_pos_x, pattern_pos_y, bit_width, bit_height
+        self, pattern, position: Point, bit_width, bit_height
     ) -> None:
         pattern_height = len(pattern)
         pattern_width = len(pattern[0])
@@ -306,20 +311,20 @@ class KnittingApp(tkinter.Tk): # pylint: disable=too-many-instance-attributes
                 row = pattern_height - row - 1
                 # stitch = patternWidth - stitch - 1
                 self.patternCanvas.create_rectangle(
-                    pattern_pos_x + stitch * bit_width,
-                    pattern_pos_y + row * bit_height,
-                    pattern_pos_x + (stitch + 1) * bit_width,
-                    pattern_pos_y + (row + 1) * bit_height,
+                    position.x + stitch * bit_width,
+                    position.y + row * bit_height,
+                    position.x + (stitch + 1) * bit_width,
+                    position.y + (row + 1) * bit_height,
                     width=1,
                     fill=fill,
                     outline=border,
                 )
         # pattern border
         self.patternCanvas.create_rectangle(
-            pattern_pos_x,
-            pattern_pos_y,
-            pattern_pos_x + (pattern_width) * bit_width,
-            pattern_pos_y + (pattern_height) * bit_height,
+            position.x,
+            position.y,
+            position.x + (pattern_width) * bit_width,
+            position.y + (pattern_height) * bit_height,
             width=1,
             outline="black",
         )

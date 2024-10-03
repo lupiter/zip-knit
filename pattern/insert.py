@@ -10,12 +10,10 @@ from pattern.maths import roundfour, bytes_for_memo
 VERSION = "1.0"
 
 
-class PatternInserter:
+class PatternInserter: # pylint: disable=too-few-public-methods
     def insert_pattern(self, oldbrotherfile, pattnum, imgfile, newbrotherfile):
 
         bf = brother.BrotherFile(oldbrotherfile)
-
-        pats = bf.get_patterns()
 
         # ok got a bank, now lets figure out how big this thing we want to insert is
         the_image = Image.open(imgfile)
@@ -28,25 +26,18 @@ class PatternInserter:
         print("height:" + str(height))
 
         # find the program entry
-        the_pattern = None
+        the_pattern = bf.get_pattern(pattnum)
 
-        for pat in pats:
-            if int(pat["number"]) == int(pattnum):
-                # print "found it!"
-                the_pattern = pat
-        if the_pattern is None:
-            raise PatternNotFoundException(pattnum)
-
-        if height != the_pattern["rows"] or width != the_pattern["stitches"]:
+        if height != the_pattern.rows or width != the_pattern.stitches:
             raise InserterException(
                 "Pattern is the wrong size, the BMP is ",
                 height,
                 "x",
                 width,
                 "and the pattern is ",
-                the_pattern["rows"],
+                the_pattern.rows,
                 "x",
-                the_pattern["stitches"],
+                the_pattern.stitches,
             )
 
         # debugging stuff here
@@ -118,7 +109,7 @@ class PatternInserter:
         # now we have to figure out the -end- of the last pattern is
         endaddr = 0x6DF
 
-        beginaddr = the_pattern["pattend"]
+        beginaddr = the_pattern.pattern_end_offset
         endaddr = beginaddr + bytes_for_memo(height) + len(pattmem)
         print(
             "beginning will be at "

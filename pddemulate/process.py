@@ -34,7 +34,7 @@ def run_disk(port: Queue, responses: Queue, imgdir: str) -> None:
             emu.close()
 
 
-class DiskProcessListener(PDDEmulatorListener):
+class DiskProcessListener(PDDEmulatorListener): # pylint: disable=too-few-public-methods
     queue: Queue
 
     def __init__(self, queue: Queue) -> None:

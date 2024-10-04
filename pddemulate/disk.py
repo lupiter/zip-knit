@@ -1,5 +1,5 @@
 import os
-from PDDemulate.disk_sector import DiskSector
+from pddemulate.disk_sector import DiskSector
 
 
 class Disk:
@@ -64,7 +64,7 @@ class Disk:
     def set_sector_id(self, psn: int, sector_id: bytes) -> None:
         self.sectors[psn].set_sector_id(sector_id)
 
-    def write_sector(self, psn: int, lsn: int, indata: bytes) -> None:
+    def write_sector(self, psn: int, __lsn: int, indata: bytes) -> None:
         self.sectors[psn].write(indata)
         if psn % 2:
             filenum = ((psn - 1) / 2) + 1
@@ -78,5 +78,5 @@ class Disk:
             os.system(cmd)
             self.last_dat_file_path = outfn
 
-    def read_sector(self, psn: int, lsn: int) -> bytes:
+    def read_sector(self, psn: int, __lsn: int) -> bytes:
         return self.sectors[psn].read(1024)

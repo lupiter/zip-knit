@@ -24,12 +24,12 @@ class DiskSector:
             try:
                 self.df = open(dfn, "rb+")
             except IOError:
-                self.df = open(dfn, "wb")
+                self.df = open(dfn, "wb") # pylint: disable=consider-using-with
 
             try:
                 self.idf = open(idfn, "rb+")
             except IOError:
-                self.idf = open(idfn, "wb")
+                self.idf = open(idfn, "wb") # pylint: disable=consider-using-with
 
             dfs = os.path.getsize(dfn)
             idfs = os.path.getsize(idfn)

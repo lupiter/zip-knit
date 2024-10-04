@@ -1,10 +1,8 @@
 import array  # type: ignore
 from pattern.maths import (
     nibbles,
-    nibbles_per_row,
     bytes_for_memo,
     bytes_per_pattern_and_memo,
-    roundeven,
     hto,
 )
 from pattern.pattern import PatternMetadata
@@ -100,27 +98,6 @@ class BrotherFile(): # pylint: disable=too-many-public-methods
             return m
         return l
 
-    def get_row_data(self, patt_offset: int, stitches: int, rownumber: int) -> bytes:
-        row = array.array("B")
-        nibspr = nibbles_per_row(stitches)
-        startnib = int(nibspr * rownumber)
-        endnib = int(startnib + nibspr)
-
-        for i in range(startnib, endnib, 1):
-            nib = self.get_indexed_nibble(patt_offset, i)
-            row.append(nib & 0x01)
-            stitches = stitches - 1
-            if stitches:
-                row.append((nib & 0x02) >> 1)
-                stitches = stitches - 1
-            if stitches:
-                row.append((nib & 0x04) >> 2)
-                stitches = stitches - 1
-            if stitches:
-                row.append((nib & 0x08) >> 3)
-                stitches = stitches - 1
-        return row
-
     def get_pattern(self, pattern_number: int) -> PatternMetadata | None:
         """
         Get information for a single pattern.
@@ -140,7 +117,7 @@ class BrotherFile(): # pylint: disable=too-many-public-methods
                 return pattern
         return None
 
-    def get_patterns(self) -> list[PatternMetadata]:
+    def get_patterns(self) -> list[PatternMetadata]: # pylint: disable=too-many-locals
         """
         Get a list of custom patterns stored in the file, or
         information for a single pattern.
@@ -201,142 +178,63 @@ class BrotherFile(): # pylint: disable=too-many-public-methods
                 break
         return patlist
 
-    def get_memo(self) -> bytes:
-        """
-        Return an array containing the memo
-        information for the pattern currently in memory
-        """
-        patt = self.pattern_number()
-        if patt > 900:
-            return self.get_pattern_memo(patt)
-        return [0]
-
-    def pattern_number(self) -> int:
-        _, pnh = nibbles(self.data[CURRENT_PATTERN_ADDR])
-        pnt, pno = nibbles(self.data[CURRENT_PATTERN_ADDR + 1])
-        pattern = hto(pnh, pnt, pno)
-        return pattern
-
-    def get_pattern_memo(self, pattern_number: int) -> bytes:
-        """
-        Return an array containing the memo
-        information for a custom pattern. The array
-        is the same length as the number of rows
-        in the pattern.
-        """
-        pattern = self.get_pattern(pattern_number)
-        if pattern is None:
-            return None
-        memos = array.array("B")
-        memo_off = pattern.memo
-        rows = pattern.rows
-        memlen = roundeven(rows) / 2
-        # memo is padded to en even byte
-        for i in range(memo_off, memo_off - memlen, -1):
-            msn, lsn = nibbles(self.data[i])
-            memos.append(lsn)
-            rows = rows - 1
-            if rows:
-                memos.append(msn)
-                rows = rows - 1
-        return memos
-
     def get_pattern_data(self, pattern_number: int) -> bytearray:
         """
         Return an array containing the pattern
         information for a pattern.
         """
-        pattern_meta = self.get_pattern(pattern_number)
-        pattern = []
+        return self.get_pattern(pattern_number).get_data(self.data)
 
-        patoff = int(pattern_meta.pattern_offset)
-        rows = pattern_meta.rows
-        stitches = pattern_meta.stitches
+    # def motif_data(self) -> list[dict]:
+    #     motiflist = []
+    #     addr = 0x07FB
+    #     for _ in range(6):
+    #         mph, mpt = nibbles(self.data[addr])
+    #         if mph & 8:
+    #             mph = mph - 8
+    #             side = "right"
+    #         else:
+    #             side = "left"
+    #         mpo, _ = nibbles(self.data[addr + 1])
+    #         mch, mct = nibbles(self.data[addr + 2])
+    #         mco, _ = nibbles(self.data[addr + 3])
+    #         pos = hto(mph, mpt, mpo)
+    #         cnt = hto(mch, mct, mco)
+    #         motiflist.append({"position": pos, "copies": cnt, "side": side})
+    #         addr = addr - 3
+    #     return motiflist
 
-        # print 'patoff = 0x%04X' % patoff
-        # print 'rows = ', rows
-        # print 'stitches = ', stitches
-        for i in range(0, rows):
-            arow = self.get_row_data(patoff, stitches, i)
-            # print arow
-            pattern.append(arow)
-        return pattern
+    # def pattern_position(self) -> dict:
+    #     addr = 0x07FE
+    #     _, ph = nibbles(self.data[addr])
+    #     if ph & 8:
+    #         ph = ph - 8
+    #         side = "right"
+    #     else:
+    #         side = "left"
+    #     pt, po = nibbles(self.data[addr + 1])
+    #     pos = hto(ph, pt, po)
 
-    def display_pattern(self, pattern_number: int) -> None:
-        """
-        Display a user pattern stored in file saved
-        from the brother knitting machine. Patterns
-        in memory are stored with the beginning of the
-        pattern at the highest memory address.
-        """
-
-        return
-
-    def row_number(self) -> int:
-        _, rnh = nibbles(self.data[CURRENT_ROW_NUMBER_ADDR])
-        rnt, rno = nibbles(self.data[CURRENT_ROW_NUMBER_ADDR + 1])
-        rowno = hto(rnh, rnt, rno)
-        return rowno
-
-    def next_fow(self) -> bytes:
-        return self.get_row_data(NEXT_ROW_ADDR, 200, 0)
-
-    def selector_value(self) -> int:
-        return self.data[SELECT_ADDR]
-
-    def carriage_status(self) -> int:
-        return self.data[CARRIAGE_STATUS_ADDR]
-
-    def motif_data(self) -> list[dict]:
-        motiflist = []
-        addr = 0x07FB
-        for _ in range(6):
-            mph, mpt = nibbles(self.data[addr])
-            if mph & 8:
-                mph = mph - 8
-                side = "right"
-            else:
-                side = "left"
-            mpo, _ = nibbles(self.data[addr + 1])
-            mch, mct = nibbles(self.data[addr + 2])
-            mco, _ = nibbles(self.data[addr + 3])
-            pos = hto(mph, mpt, mpo)
-            cnt = hto(mch, mct, mco)
-            motiflist.append({"position": pos, "copies": cnt, "side": side})
-            addr = addr - 3
-        return motiflist
-
-    def pattern_position(self) -> dict:
-        addr = 0x07FE
-        _, ph = nibbles(self.data[addr])
-        if ph & 8:
-            ph = ph - 8
-            side = "right"
-        else:
-            side = "left"
-        pt, po = nibbles(self.data[addr + 1])
-        pos = hto(ph, pt, po)
-
-        return {"position": pos, "side": side}
+    #     return {"position": pos, "side": side}
 
     # these are hardcoded for now
-    def unknown_one(self):
-        info = array.array("B")
-        for i in range(0x06E0, 0x06E5):
-            info.append(self.data[i])
-        return info
+    # def unknown_one(self):
+    #     info = array.array("B")
+    #     for i in range(0x06E0, 0x06E5):
+    #         info.append(self.data[i])
+    #     return info
 
-    def unknown_memo_range(self):
-        info = array.array("B")
-        for i in range(0x0731, 0x0787):
-            info.append(self.data[i])
-        return info
+    # def unknown_memo_range(self):
+    #     info = array.array("B")
+    #     for i in range(0x0731, 0x0787):
+    #         info.append(self.data[i])
+    #     return info
 
-    def unknown_end_range(self):
-        info = array.array("B")
-        for i in range(0x07D0, 0x07E9):
-            info.append(self.data[i])
-        return info
+    # def unknown_end_range(self):
+    #     info = array.array("B")
+    #     for i in range(0x07D0, 0x07E9):
+    #         info.append(self.data[i])
+    #     return info
 
-    def unknown_addrs(self):
-        return list(unknownList.items())
+    # def unknown_addrs(self):
+    #     return list(unknownList.items())

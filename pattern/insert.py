@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 
+from collections import namedtuple
 import sys
 from PIL import Image
 import pattern.file as brother
@@ -9,10 +10,13 @@ from pattern.maths import roundfour, bytes_for_memo
 
 VERSION = "1.0"
 
+Size = namedtuple('Size', 'width height')
 
 class PatternInserter: # pylint: disable=too-few-public-methods
-    def insert_pattern(self, oldbrotherfile, pattnum, imgfile, newbrotherfile):
+    def __init__(self, printer) -> None:
+        self.print = printer
 
+    def insert_pattern(self, oldbrotherfile, pattnum, imgfile, newbrotherfile): # pylint: disable=too-many-locals,too-many-branches,too-many-statements
         bf = brother.BrotherFile(oldbrotherfile)
 
         # ok got a bank, now lets figure out how big this thing we want to insert is
@@ -21,9 +25,9 @@ class PatternInserter: # pylint: disable=too-few-public-methods
 
         im_size = the_image.size
         width = im_size[0]
-        print("width:" + str(width))
+        self.print("width:" + str(width))
         height = im_size[1]
-        print("height:" + str(height))
+        self.print("height:" + str(height))
 
         # find the program entry
         the_pattern = bf.get_pattern(pattnum)
@@ -49,10 +53,10 @@ class PatternInserter: # pylint: disable=too-few-public-methods
             for x in range(width):
                 value = the_image.getpixel((x, y))
                 if value:
-                    print("* ")
+                    self.print("* ")
                 else:
-                    print("  ")
-            print(" ")
+                    self.print("  ")
+            self.print(" ")
 
         # debugging stuff done
 
@@ -111,7 +115,7 @@ class PatternInserter: # pylint: disable=too-few-public-methods
 
         beginaddr = the_pattern.pattern_end_offset
         endaddr = beginaddr + bytes_for_memo(height) + len(pattmem)
-        print(
+        self.print(
             "beginning will be at "
             + str(hex(beginaddr))
             + ", end at "
@@ -126,7 +130,7 @@ class PatternInserter: # pylint: disable=too-few-public-methods
         # Steve
 
         if beginaddr <= 0x2B8:
-            print(
+            self.print(
                 "Sorry, this will collide with the pattern "
                 + f"entry data since {hex(beginaddr)} is <= 0x2B8!"
             )
@@ -168,7 +172,7 @@ if __name__ == "__main__":
     if len(sys.argv) < 5:
         print(f"Usage: {sys.argv[0]} oldbrotherfile pattern# image.bmp newbrotherfile")
         sys.exit()
-    inserter = PatternInserter()
+    inserter = PatternInserter(print)
     argv = sys.argv
     try:
         inserter.insert_pattern(argv[1], argv[2], argv[3], argv[4])

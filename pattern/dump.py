@@ -41,7 +41,7 @@ class PatternDumper: # pylint: disable=too-few-public-methods
             result.pattern = bf.get_pattern_data(patt)
         return result
 
-    def __pattern_print(self, bf: BrotherFile):
+    def __pattern_print(self, bf: BrotherFile): # pylint: disable=too-many-locals,too-many-branches,too-many-statements
         print("-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+")
         print("Data file")
         print("-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+")

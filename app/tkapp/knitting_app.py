@@ -5,6 +5,7 @@ import tkinter
 import tkinter.filedialog
 import os
 import os.path
+from collections import namedtuple
 from PIL import Image
 
 from pddemulate.drive import PDDemulator
@@ -16,11 +17,7 @@ from app.gui.gui import Gui
 from app.tkapp.config import Config
 from app.tkapp.messages import Messages
 
-class Point:
-    def __init__(self, x, y) -> None:
-        self.x = x
-        self.y = y
-
+Point = namedtuple('Point', 'x y')
 
 class KnittingApp(tkinter.Tk): # pylint: disable=too-many-instance-attributes
 
@@ -48,8 +45,7 @@ class KnittingApp(tkinter.Tk): # pylint: disable=too-many-instance-attributes
 
         self.pattern_dumper = PatternDumper()
         self.pattern_dumper.print_info_callback = self.msg.show_info
-        self.pattern_inserter = PatternInserter()
-        self.pattern_inserter.print_info_callback = self.msg.show_info
+        self.pattern_inserter = PatternInserter(self.msg.show_info)
         self.pattern_inserter.print_error_callback = self.msg.show_error
         self.after_idle(self.reload_pattern_file)
 
@@ -266,7 +262,7 @@ class KnittingApp(tkinter.Tk): # pylint: disable=too-many-instance-attributes
             )
         return "No pattern"
 
-    def __print_pattern_on_canvas(self, pattern) -> None:
+    def __print_pattern_on_canvas(self, pattern) -> None: # pylint: disable=too-many-locals
         #        pattern = []
         #        for x in range(8):
         #            row = []

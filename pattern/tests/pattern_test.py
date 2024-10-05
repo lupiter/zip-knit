@@ -14,7 +14,7 @@ class TestPattern(unittest.TestCase):
             pattern_end_offset=32,
         )
         memo = pattern.get_memo(list(range(32)))
-        self.assertEqual(memo, ["B", 8])
+        self.assertEqual(memo, b'\x08')
 
     def test_get_data(self):
         pattern = PatternMetadata(
@@ -26,7 +26,7 @@ class TestPattern(unittest.TestCase):
             pattern_end_offset=32,
         )
         data = pattern.get_data(list(range(32)))
-        self.assertEqual(data, [["B", 0, 0, 0, 0, 1, 0, 0, 0]])
+        self.assertEqual(data, [b'\x00\x00\x00\x00\x01\x00\x00\x00'])
 
         pattern = PatternMetadata(
             number=1,
@@ -40,13 +40,13 @@ class TestPattern(unittest.TestCase):
         self.assertEqual(
             data,
             [
-                ["B", 0],
-                ["B", 1],
-                ["B", 1],
-                ["B", 0],
-                ["B", 0],
-                ["B", 0],
-                ["B", 1],
-                ["B", 0],
+                b'\x00',
+                b'\x01',
+                b'\x01',
+                b'\x00',
+                b'\x00',
+                b'\x00',
+                b'\x01',
+                b'\x00',
             ],
         )

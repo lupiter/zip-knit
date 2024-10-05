@@ -46,49 +46,36 @@ unknownList = {
 
 class BrotherFile:  # pylint: disable=too-many-public-methods
     """Reading a brother "file" representing a floppy disk track"""
+    data_file_name: str
+    data: bytes
+    verbose: bool = False
 
-    def __init__(self, fn):
-        self.dfn: str
-        self.data: bytes
-        self.verbose = False
+    def __init__(self, file_name: str):
+        self.data_file_name = file_name
         try:
-            with open(fn, "rb+") as df:
-                try:
-                    self.data = df.read(-1)
-                    if len(self.data) == 0:
-                        raise FileNotFoundError("The file has no data")
-                except:
-                    print(f"Unable to read 2048 bytes from file <{fn}>")
-                    raise
+            with open(file_name, "rb+") as data_file:
+                self.data = data_file.read(-1)
+                if len(self.data) == 0:
+                    raise FileNotFoundError("The file has no data")
         except:
-            print(f"Unable to open brother file <{fn}>")
+            print(f"Unable to open brother file <{file_name}>")
             raise
-        self.dfn = fn
 
     def get_indexed_byte(self, index: int) -> int:
         return self.data[index]
 
     def set_indexed_byte(self, index: int, b: int):
-        # python strings are mutable so we
-        # will convert the string to a char array, poke
+        # python bytes are immutable so we
+        # will convert the bytes to a list, modify
         # and convert back
-        dataarray = array.array("c")
-        dataarray.frombytes(self.data)
+        dataarray = list(self.data)
 
         if self.verbose:
             print(("* writing ", hex(b), "to", hex(index)))
         # print dataarray
 
-        # this is the actual edit
-        dataarray[index] = chr(b)
-
-        # save the new string. sure its not very memory-efficient
-        # but who cares?
-        self.data = dataarray.tobytes()
-
-    # handy for debugging
-    def get_full_data(self) -> bytes:
-        return self.data
+        dataarray[index] = b
+        self.data = bytes(dataarray)
 
     def get_indexed_nibble(self, offset: int, nibble: int) -> int:
         # nibbles is zero based
@@ -161,7 +148,7 @@ class BrotherFile:  # pylint: disable=too-many-public-methods
                 print(f"   Pattern {patno}: {rows} Rows, {stitches} Stitches - ")
             if flag != 0:
                 # valid entry
-                pptr = len(self.data) - 1 - ((flag << 8) + unknown)
+                pptr = int(len(self.data) - 1 - ((flag << 8) + unknown))
                 memoff = pptr
                 if self.verbose:
                     print(("Memo #", patno, "offset ", memoff))
@@ -185,7 +172,7 @@ class BrotherFile:  # pylint: disable=too-many-public-methods
                 break
         return patlist
 
-    def get_pattern_data(self, pattern_number: int) -> bytearray:
+    def get_pattern_data(self, pattern_number: int) -> list[bytes]:
         """
         Return an array containing the pattern
         information for a pattern.

@@ -143,9 +143,7 @@ def insert_pattern(
 
     # push the data to a file
     with open(newbrotherfile, "wb") as outfile:
-        d = bf.get_full_data()
-        outfile.write(d)
-        outfile.close()
+        outfile.write(bf.data)
 
 
 class InserterException(Exception):

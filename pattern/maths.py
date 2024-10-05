@@ -39,7 +39,7 @@ def bytes_per_pattern(stitches: int, rows: int) -> int:
 
 def bytes_for_memo(rows: int) -> int:
     b = roundeven(rows) / 2
-    return b
+    return int(b)
 
 
 def bytes_per_pattern_and_memo(stitches: int, rows: int) -> int:

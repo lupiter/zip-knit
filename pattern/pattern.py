@@ -11,16 +11,16 @@ class PatternMetadata:
     pattern_offset: int
     pattern_end_offset: int
 
-    def __init__( # pylint: disable=too-many-arguments
-            self,
-            *,
-            number: int,
-            stitches: int,
-            rows: int,
-            memo_offset: int,
-            pattern_offset: int,
-            pattern_end_offset: int
-        ) -> None:
+    def __init__(  # pylint: disable=too-many-arguments
+        self,
+        *,
+        number: int,
+        stitches: int,
+        rows: int,
+        memo_offset: int,
+        pattern_offset: int,
+        pattern_end_offset: int
+    ) -> None:
         self.number = number
         self.stitches = stitches
         self.rows = rows

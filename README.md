@@ -1,5 +1,7 @@
 # Zipknit
 
+[![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
+
 ## What?
 
 This is an attempt to emulate the FB-100 drive. If you're using a knitting machine, you're probably looking for one of the following projects instead:

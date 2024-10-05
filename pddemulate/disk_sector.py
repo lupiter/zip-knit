@@ -24,12 +24,12 @@ class DiskSector:
             try:
                 self.df = open(dfn, "rb+")
             except IOError:
-                self.df = open(dfn, "wb") # pylint: disable=consider-using-with
+                self.df = open(dfn, "wb")  # pylint: disable=consider-using-with
 
             try:
                 self.idf = open(idfn, "rb+")
             except IOError:
-                self.idf = open(idfn, "wb") # pylint: disable=consider-using-with
+                self.idf = open(idfn, "wb")  # pylint: disable=consider-using-with
 
             dfs = os.path.getsize(dfn)
             idfs = os.path.getsize(idfn)
@@ -63,8 +63,8 @@ class DiskSector:
                 self.id = self.idf.read(self.id_size)
             else:
                 print(
-                    f"Found an ID file <{idfn}> with the wrong size," +
-                    f" is {idfs} should be {self.id_size}"
+                    f"Found an ID file <{idfn}> with the wrong size,"
+                    + f" is {idfs} should be {self.id_size}"
                 )
                 raise IOError
         except:

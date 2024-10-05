@@ -5,8 +5,9 @@ from tkinter.ttk import Style
 from app.gui.devices import Devices
 
 
-class Gui: # pylint: disable=too-many-instance-attributes
+class Gui:  # pylint: disable=too-many-instance-attributes
     """Manager for the UI setting up the buttons and layout"""
+
     __max_columns = 1000
     __max_rows = 1000
     __row = 0
@@ -58,7 +59,9 @@ class Gui: # pylint: disable=too-many-instance-attributes
         self.set_emu_button_stopped()
 
         but = Button(
-            self.main_window, text="Help...", command=self.main_window.help_button_clicked
+            self.main_window,
+            text="Help...",
+            command=self.main_window.help_button_clicked,
         )
         but.grid(column=4, row=self.__row, sticky="E", padx=5, pady=5)
 
@@ -165,8 +168,9 @@ class Gui: # pylint: disable=too-many-instance-attributes
         b.caption.set("Stop emulator")
 
 
-class ExtendedCanvas(Canvas): # pylint: disable=too-many-ancestors
+class ExtendedCanvas(Canvas):  # pylint: disable=too-many-ancestors
     """Canvas, with convenience method to clear it"""
+
     def get_width(self) -> int:
         """Width in pixels"""
         w = self.winfo_width()
@@ -183,8 +187,9 @@ class ExtendedCanvas(Canvas): # pylint: disable=too-many-ancestors
         self.create_rectangle(0, 0, maxsize, maxsize, width=0, fill=self.cget("bg"))
 
 
-class ListboxVar: # pylint: disable=too-few-public-methods
+class ListboxVar:  # pylint: disable=too-few-public-methods
     """Items for showing in a Listbox"""
+
     def __init__(self, listbox, stringvar) -> None:
         self._stringvar = stringvar
         self._listbox = listbox

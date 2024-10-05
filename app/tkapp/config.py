@@ -1,6 +1,7 @@
 ﻿import os
 
-class Config: # pylint: disable=too-few-public-methods
+
+class Config:  # pylint: disable=too-few-public-methods
     imgdir: str = "img"
     device: str = "/dev/ttyUSB0"
     dat_file: str

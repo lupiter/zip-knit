@@ -17,9 +17,10 @@ from app.gui.gui import ExtendedCanvas, Gui
 from app.tkapp.config import Config
 from app.tkapp.messages import Messages
 
-Point = namedtuple('Point', 'x y')
+Point = namedtuple("Point", "x y")
 
-class KnittingApp(tkinter.Tk): # pylint: disable=too-many-instance-attributes
+
+class KnittingApp(tkinter.Tk):  # pylint: disable=too-many-instance-attributes
     pattern_canvas: ExtendedCanvas
 
     def __init__(self, parent=None) -> None:
@@ -151,7 +152,9 @@ class KnittingApp(tkinter.Tk): # pylint: disable=too-many-instance-attributes
 
         with open(path_to_file, "rb") as infile:
             try:
-                with open(track_path_1, "wb") as track0file, open(track_path_2, "wb") as track1file:
+                with open(track_path_1, "wb") as track0file, open(
+                    track_path_2, "wb"
+                ) as track1file:
                     t0dat = infile.read(track_size)
                     t1dat = infile.read(track_size)
 
@@ -237,7 +240,9 @@ class KnittingApp(tkinter.Tk): # pylint: disable=too-many-instance-attributes
         self.patternTitle.caption.set(self.__get_pattern_title(pattern))
         if pattern:
             result = dump_pattern(
-                self.current_dat_file, str(pattern["number"]), printer=self.msg.show_info
+                self.current_dat_file,
+                str(pattern["number"]),
+                printer=self.msg.show_info,
             )
             if result:
                 self.__print_pattern_on_canvas(result[0])
@@ -257,7 +262,9 @@ class KnittingApp(tkinter.Tk): # pylint: disable=too-many-instance-attributes
             )
         return "No pattern"
 
-    def __print_pattern_on_canvas(self, pattern) -> None: # pylint: disable=too-many-locals
+    def __print_pattern_on_canvas(
+        self, pattern
+    ) -> None:  # pylint: disable=too-many-locals
         #        pattern = []
         #        for x in range(8):
         #            row = []
@@ -278,10 +285,14 @@ class KnittingApp(tkinter.Tk): # pylint: disable=too-many-instance-attributes
             sec_coord = sec_coord_big if i % big_step == 0 else sec_coord_small
             if i < pattern_width:
                 x_coord = margin.x + i * bit_width
-                self.pattern_canvas.create_line(x_coord, sec_coord, x_coord, sec_coord_2)
+                self.pattern_canvas.create_line(
+                    x_coord, sec_coord, x_coord, sec_coord_2
+                )
             if i < pattern_height:
                 y_coord = margin.x + i * bit_height
-                self.pattern_canvas.create_line(sec_coord, y_coord, sec_coord_2, y_coord)
+                self.pattern_canvas.create_line(
+                    sec_coord, y_coord, sec_coord_2, y_coord
+                )
 
     def __print_pattern_body(
         self, pattern, position: Point, bit_width, bit_height
@@ -391,12 +402,16 @@ class KnittingApp(tkinter.Tk): # pylint: disable=too-many-instance-attributes
         )
         old_brother_file = self.current_dat_file
         insert_pattern(
-            old_brother_file, pattern_number, bitmap_file, old_brother_file, self.msg.show_info
+            old_brother_file,
+            pattern_number,
+            bitmap_file,
+            old_brother_file,
+            self.msg.show_info,
         )
         self.reload_pattern_file()
 
 
-class PDDListener(PDDEmulatorListener): # pylint: disable=too-few-public-methods
+class PDDListener(PDDEmulatorListener):  # pylint: disable=too-few-public-methods
 
     def __init__(self, inner_app: KnittingApp) -> None:
         self.app = inner_app

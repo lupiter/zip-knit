@@ -7,7 +7,7 @@ from pattern.file import BrotherFile
 
 
 THIS_DIR = Path(__file__).parent
-SAMPLE = os.path.join(THIS_DIR, "file-01.dat")
+SAMPLE = os.path.join(THIS_DIR, "file-01.dat.sample")
 
 
 class TestFile(unittest.TestCase):

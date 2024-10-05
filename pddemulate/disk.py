@@ -40,7 +40,7 @@ class Disk:
         self.filespath = dirpath
         # we have a directory now - set up disk sectors
         for i in range(self.num_sectors):
-            fname = os.path.join(dirpath, i)
+            fname = os.path.join(dirpath, str(i))
             ds = DiskSector(fname)
             self.sectors.append(ds)
 

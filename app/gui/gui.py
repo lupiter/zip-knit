@@ -51,14 +51,14 @@ class Gui: # pylint: disable=too-many-instance-attributes
         self.emu_button = Button(
             self.main_window,
             textvariable=caption,
-            command=self.main_window.emuButtonClicked,
+            command=self.main_window.emu_button_clicked,
         )
         self.emu_button.caption = caption
         self.emu_button.grid(column=2, row=self.__row, columnspan=2, sticky="EW")
         self.set_emu_button_stopped()
 
         but = Button(
-            self.main_window, text="Help...", command=self.main_window.helpButtonClicked
+            self.main_window, text="Help...", command=self.main_window.help_button_clicked
         )
         but.grid(column=4, row=self.__row, sticky="E", padx=5, pady=5)
 
@@ -74,21 +74,21 @@ class Gui: # pylint: disable=too-many-instance-attributes
         self.choose_dat_file_button = Button(
             self.main_window,
             text="...",
-            command=self.main_window.chooseDatFileButtonClicked,
+            command=self.main_window.choose_dat_file_button_clicked,
         )
         self.choose_dat_file_button.grid(column=2, row=self.__row, sticky="W")
 
         self.reload_dat_file_button = Button(
             self.main_window,
             text="Reload file",
-            command=self.main_window.reloadDatFileButtonClicked,
+            command=self.main_window.reload_dat_file_button_clicked,
         )
         self.reload_dat_file_button.grid(column=3, row=self.__row, sticky="EW")
 
         but = Button(
             self.main_window,
             text="Store track",
-            command=self.main_window.storeTrackButtonClicked,
+            command=self.main_window.store_track_button_clicked,
         )
         but.grid(column=4, row=self.__row, sticky="EW", padx=5)
         self.store_track_button = but
@@ -141,20 +141,20 @@ class Gui: # pylint: disable=too-many-instance-attributes
         self.insert_bitmap_button = Button(
             pattern_frame,
             text="Insert bitmap...",
-            command=self.main_window.insertBitmapButtonClicked,
+            command=self.main_window.insert_bitmap_button_clicked,
         )
         self.insert_bitmap_button.grid(column=2, row=0, sticky="EW")
 
         self.export_bitmap_button = Button(
             pattern_frame,
             text="Export bitmap...",
-            command=self.main_window.exportBitmapButtonClicked,
+            command=self.main_window.export_bitmap_button_clicked,
         )
         self.export_bitmap_button.grid(column=3, row=0, sticky="EW")
 
         pc = ExtendedCanvas(pattern_frame, bg="white")
         pc.grid(column=1, row=1, sticky="EWNS", columnspan=3)
-        self.main_window.patternCanvas = pc
+        self.main_window.pattern_canvas = pc
 
     def set_emu_button_stopped(self) -> None:
         b = self.emu_button

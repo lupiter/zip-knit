@@ -13,13 +13,14 @@ from pddemulate.listener import PDDEmulatorListener
 from pattern.dump import PatternDumper
 from pattern.insert import PatternInserter
 
-from app.gui.gui import Gui
+from app.gui.gui import ExtendedCanvas, Gui
 from app.tkapp.config import Config
 from app.tkapp.messages import Messages
 
 Point = namedtuple('Point', 'x y')
 
 class KnittingApp(tkinter.Tk): # pylint: disable=too-many-instance-attributes
+    pattern_canvas: ExtendedCanvas
 
     def __init__(self, parent=None) -> None:
         tkinter.Tk.__init__(self, parent)
@@ -30,7 +31,6 @@ class KnittingApp(tkinter.Tk): # pylint: disable=too-many-instance-attributes
         self.current_dat_file = None
 
         self.init_config()
-        self.initializeUtilities()
 
         self.gui = Gui(self)
         self.__update_pattern_canvas_last_size()
@@ -238,7 +238,7 @@ class KnittingApp(tkinter.Tk): # pylint: disable=too-many-instance-attributes
     def __display_pattern(self, pattern=None) -> None:
         if not pattern:
             pattern = self.pattern
-        self.patternCanvas.clear()
+        self.pattern_canvas.clear()
         self.patternTitle.caption.set(self.__get_pattern_title(pattern))
         if pattern:
             result = self.pattern_dumper.dump_pattern(
@@ -272,8 +272,8 @@ class KnittingApp(tkinter.Tk): # pylint: disable=too-many-instance-attributes
         pattern_height = len(pattern)
         pattern_width = len(pattern[0])
         margin = Point(10, 10)
-        bit_width = (self.patternCanvas.getWidth() - margin.x) / (pattern_width)
-        bit_height = (self.patternCanvas.getHeight() - margin.y) / (pattern_height)
+        bit_width = (self.pattern_canvas.get_width() - margin.x) / (pattern_width)
+        bit_height = (self.pattern_canvas.get_height() - margin.y) / (pattern_height)
         bit_width = min(bit_width, bit_height)
         bit_height = bit_width
         self.__print_pattern_body(pattern, margin, bit_width, bit_height)
@@ -283,17 +283,17 @@ class KnittingApp(tkinter.Tk): # pylint: disable=too-many-instance-attributes
             sec_coord = sec_coord_big if i % big_step == 0 else sec_coord_small
             if i < pattern_width:
                 x_coord = margin.x + i * bit_width
-                self.patternCanvas.create_line(x_coord, sec_coord, x_coord, sec_coord_2)
+                self.pattern_canvas.create_line(x_coord, sec_coord, x_coord, sec_coord_2)
             if i < pattern_height:
                 y_coord = margin.x + i * bit_height
-                self.patternCanvas.create_line(sec_coord, y_coord, sec_coord_2, y_coord)
+                self.pattern_canvas.create_line(sec_coord, y_coord, sec_coord_2, y_coord)
 
     def __print_pattern_body(
         self, pattern, position: Point, bit_width, bit_height
     ) -> None:
         pattern_height = len(pattern)
         pattern_width = len(pattern[0])
-        self.patternCanvas.clear()
+        self.pattern_canvas.clear()
         for row in range(pattern_height):
             for stitch in range(pattern_width):
                 if (pattern[row][stitch]) == 1:
@@ -306,7 +306,7 @@ class KnittingApp(tkinter.Tk): # pylint: disable=too-many-instance-attributes
                     # border=fill
                 row = pattern_height - row - 1
                 # stitch = patternWidth - stitch - 1
-                self.patternCanvas.create_rectangle(
+                self.pattern_canvas.create_rectangle(
                     position.x + stitch * bit_width,
                     position.y + row * bit_height,
                     position.x + (stitch + 1) * bit_width,
@@ -316,7 +316,7 @@ class KnittingApp(tkinter.Tk): # pylint: disable=too-many-instance-attributes
                     outline=border,
                 )
         # pattern border
-        self.patternCanvas.create_rectangle(
+        self.pattern_canvas.create_rectangle(
             position.x,
             position.y,
             position.x + (pattern_width) * bit_width,
@@ -326,13 +326,13 @@ class KnittingApp(tkinter.Tk): # pylint: disable=too-many-instance-attributes
         )
 
     def __update_pattern_canvas_last_size(self) -> None:
-        self.patternCanvas.lastWidth = self.patternCanvas.getWidth()
-        self.patternCanvas.lastHeight = self.patternCanvas.getHeight()
+        self.pattern_canvas.lastWidth = self.pattern_canvas.get_width()
+        self.pattern_canvas.lastHeight = self.pattern_canvas.get_height()
 
     def __canvas_configured(self) -> None:
         if (
-            self.patternCanvas.lastWidth != self.patternCanvas.getWidth()
-            or self.patternCanvas.lastHeight != self.patternCanvas.getHeight()
+            self.pattern_canvas.lastWidth != self.pattern_canvas.get_width()
+            or self.pattern_canvas.lastHeight != self.pattern_canvas.get_height()
         ):
             self.msg.display_messages = False
             self.__update_pattern_canvas_last_size()

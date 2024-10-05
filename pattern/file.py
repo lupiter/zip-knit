@@ -44,7 +44,7 @@ unknownList = {
 }
 
 
-class BrotherFile(): # pylint: disable=too-many-public-methods
+class BrotherFile:  # pylint: disable=too-many-public-methods
     """Reading a brother "file" representing a floppy disk track"""
 
     def __init__(self, fn):
@@ -117,7 +117,7 @@ class BrotherFile(): # pylint: disable=too-many-public-methods
                 return pattern
         return None
 
-    def get_patterns(self) -> list[PatternMetadata]: # pylint: disable=too-many-locals
+    def get_patterns(self) -> list[PatternMetadata]:  # pylint: disable=too-many-locals
         """
         Get a list of custom patterns stored in the file, or
         information for a single pattern.
@@ -172,7 +172,14 @@ class BrotherFile(): # pylint: disable=too-many-public-methods
                 if self.verbose:
                     print(("Ending offset ", hex(pptr)))
                 patlist.append(
-                    PatternMetadata(patno, stitches, rows, memoff, patoff, pptr)
+                    PatternMetadata(
+                        number=patno,
+                        stitches=stitches,
+                        rows=rows,
+                        memo_offset=memoff,
+                        pattern_offset=patoff,
+                        pattern_end_offset=pptr,
+                    )
                 )
             else:
                 break

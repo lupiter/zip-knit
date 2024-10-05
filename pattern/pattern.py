@@ -13,6 +13,7 @@ class PatternMetadata:
 
     def __init__( # pylint: disable=too-many-arguments
             self,
+            *,
             number: int,
             stitches: int,
             rows: int,

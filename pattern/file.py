@@ -1,4 +1,3 @@
-import array  # type: ignore
 from pattern.maths import (
     nibbles,
     bytes_for_memo,
@@ -46,6 +45,7 @@ unknownList = {
 
 class BrotherFile:  # pylint: disable=too-many-public-methods
     """Reading a brother "file" representing a floppy disk track"""
+
     data_file_name: str
     data: bytes
     verbose: bool = False

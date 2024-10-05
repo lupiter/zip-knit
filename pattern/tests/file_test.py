@@ -16,7 +16,7 @@ class TestFile(unittest.TestCase):
             BrotherFile("")
 
         with self.assertRaises(FileNotFoundError):
-            with tempfile.NamedTemporaryFile(mode='r') as tmp:
+            with tempfile.NamedTemporaryFile(mode="r") as tmp:
                 BrotherFile(tmp.name)
 
         with tempfile.NamedTemporaryFile() as tmp:
@@ -35,7 +35,7 @@ class TestFile(unittest.TestCase):
             file = BrotherFile(tmp.name)
             self.assertEqual(file.get_indexed_byte(0), fake_data[0])
             self.assertEqual(file.get_indexed_byte(31), fake_data[31])
-    
+
     def test_set_indexed_byte(self):
         with tempfile.NamedTemporaryFile() as tmp:
             fake_data = bytes(range(32))
@@ -82,7 +82,7 @@ class TestFile(unittest.TestCase):
         self.assertEqual(first, patterns[0])
         last = file.get_pattern(34)
         self.assertEqual(last, patterns[1])
-    
+
     def test_get_pattern_data(self):
         file = BrotherFile(SAMPLE)
         data = file.get_pattern_data(0)

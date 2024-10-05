@@ -1,5 +1,3 @@
-import array
-
 from pattern.maths import nibbles, nibbles_per_row, roundeven
 
 

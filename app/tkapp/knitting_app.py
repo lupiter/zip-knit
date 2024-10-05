@@ -262,9 +262,9 @@ class KnittingApp(tkinter.Tk):  # pylint: disable=too-many-instance-attributes
             )
         return "No pattern"
 
-    def __print_pattern_on_canvas(
+    def __print_pattern_on_canvas(  # pylint: disable=too-many-locals
         self, pattern
-    ) -> None:  # pylint: disable=too-many-locals
+    ) -> None:
         #        pattern = []
         #        for x in range(8):
         #            row = []

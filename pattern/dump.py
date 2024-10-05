@@ -73,7 +73,7 @@ class PatternDumper: # pylint: disable=too-few-public-methods
 
             rows1 =  bf.get_indexed_byte(bytenum)
             print(f"\t{hex(bytenum)}: {hex(rows1)}\t" +
-                  f"\t+ {(rows1 >> 4)} stiches = {(rows1 & 0xF)*100,"+"}")
+                  f"\t+ {(rows1 >> 4)} stiches = {(rows1 & 0xF)*100}+")
             bytenum += 1
 
             stitches10 =  bf.get_indexed_byte(bytenum)

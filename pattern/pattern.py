@@ -28,10 +28,10 @@ class PatternMetadata:
         self.pattern_offset = pattern_offset
         self.pattern_end_offset = pattern_end_offset
 
-    def get_memo(self, data):
-        memos = array.array("B")
+    def get_memo(self, data: bytes) -> array:
+        memos = ["B"]
         rows = self.rows
-        memlen = roundeven(rows) / 2
+        memlen = int(roundeven(rows) / 2)
         # memo is padded to en even byte
         for i in range(self.memo_offset, self.memo_offset - memlen, -1):
             msn, lsn = nibbles(data[i])
@@ -42,7 +42,7 @@ class PatternMetadata:
                 rows = rows - 1
         return memos
 
-    def get_data(self, data: bytes):
+    def get_data(self, data: bytes) -> bytes:
         pattern = []
 
         # print 'patoff = 0x%04X' % patoff
@@ -55,10 +55,11 @@ class PatternMetadata:
         return pattern
 
     def __get_row_data(self, data: bytes, rownumber: int) -> bytes:
-        row = array.array("B")
+        row = ["B"]
         nibspr = nibbles_per_row(self.stitches)
         startnib = int(nibspr * rownumber)
         endnib = int(startnib + nibspr)
+        stitches = self.stitches
 
         for i in range(startnib, endnib, 1):
             nib = self.__get_indexed_nibble(data, i)

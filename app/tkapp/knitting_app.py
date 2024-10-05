@@ -128,8 +128,7 @@ class KnittingApp(tkinter.Tk): # pylint: disable=too-many-instance-attributes
             return
         self.current_dat_file = path_to_file
         try:
-            result = self.pattern_dumper.dump_pattern([path_to_file])
-            self.patterns = result.patterns
+            self.patterns = self.pattern_dumper.dump_pattern([path_to_file])
             list_box_model = []
             for p in self.patterns:
                 list_box_model.append(self.__get_pattern_title(p))
@@ -244,8 +243,8 @@ class KnittingApp(tkinter.Tk): # pylint: disable=too-many-instance-attributes
             result = self.pattern_dumper.dump_pattern(
                 [self.current_dat_file, str(pattern["number"])]
             )
-            if result.pattern:
-                self.__print_pattern_on_canvas(result.pattern)
+            if result:
+                self.__print_pattern_on_canvas(result[0])
         self.pattern = pattern
 
     def __get_pattern_title(self, pattern) -> str:
@@ -372,7 +371,7 @@ class KnittingApp(tkinter.Tk): # pylint: disable=too-many-instance-attributes
             result = self.pattern_dumper.dump_pattern(
                 [self.current_dat_file, str(pattern_number)]
             )
-            pattern = result.pattern
+            pattern = result[0]
             pattern_height = len(pattern)
             pattern_width = len(pattern[0])
             img = Image.new("RGB", (pattern_width, pattern_height), None)

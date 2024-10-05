@@ -173,9 +173,9 @@ def main():
             for pat in out:
                 print(f'  {pat["number"]}       {pat["stitches"]}      {pat["rows"]}')
         elif len(out) > 0:
-            for row, _ in enumerate(out):
-                for stitch, _ in enumerate(out[row]):
-                    if (out[row][stitch]) == 0:
+            for row in out:
+                for stitch in row:
+                    if stitch == 0:
                         print(" ", end=" ")
                     else:
                         print("*", end=" ")

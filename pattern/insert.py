@@ -10,9 +10,12 @@ from pattern.maths import roundfour, bytes_for_memo
 
 VERSION = "1.0"
 
-Size = namedtuple('Size', 'width height')
+Size = namedtuple("Size", "width height")
 
-def insert_pattern(oldbrotherfile, pattnum, imgfile, newbrotherfile, printer=print): # pylint: disable=too-many-locals,too-many-branches,too-many-statements
+
+def insert_pattern(
+    oldbrotherfile, pattnum, imgfile, newbrotherfile, printer=print
+):  # pylint: disable=too-many-locals,too-many-branches,too-many-statements
     bf = brother.BrotherFile(oldbrotherfile)
 
     # ok got a bank, now lets figure out how big this thing we want to insert is
@@ -112,10 +115,7 @@ def insert_pattern(oldbrotherfile, pattnum, imgfile, newbrotherfile, printer=pri
     beginaddr = the_pattern.pattern_end_offset
     endaddr = beginaddr + bytes_for_memo(height) + len(pattmem)
     printer(
-        "beginning will be at "
-        + str(hex(beginaddr))
-        + ", end at "
-        + str(hex(endaddr))
+        "beginning will be at " + str(hex(beginaddr)) + ", end at " + str(hex(endaddr))
     )
 
     # Note - It's note certain that in all cases this collision test is needed. What's happening

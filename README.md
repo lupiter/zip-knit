@@ -30,6 +30,8 @@ I should find somewhere to archive the saved binary data for future use.
 
 ## Start
 
+You'll need Python 3.10 or later (that's point ten, not point one)
+
 ```bash
 brew install python-tk
 

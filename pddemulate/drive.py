@@ -137,7 +137,6 @@ class PDDemulator:
         print("Handling command", cmd)
 
         match cmd:
-
             case b"\r":
                 self.serial.write_bytes(b"00000000")
                 return

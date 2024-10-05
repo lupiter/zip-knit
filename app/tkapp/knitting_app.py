@@ -10,7 +10,7 @@ from PIL import Image
 
 from pddemulate.drive import PDDemulator
 from pddemulate.listener import PDDEmulatorListener
-from pattern.dump import PatternDumper
+from pattern.dump import dump_pattern
 from pattern.insert import PatternInserter
 
 from app.gui.gui import ExtendedCanvas, Gui
@@ -43,8 +43,6 @@ class KnittingApp(tkinter.Tk): # pylint: disable=too-many-instance-attributes
         self.emu.listeners.append(PDDListener(self))
         self.__set_emulator_started(False)
 
-        self.pattern_dumper = PatternDumper()
-        self.pattern_dumper.print_info_callback = self.msg.show_info
         self.pattern_inserter = PatternInserter(self.msg.show_info)
         self.pattern_inserter.print_error_callback = self.msg.show_error
         self.after_idle(self.reload_pattern_file)
@@ -128,7 +126,7 @@ class KnittingApp(tkinter.Tk): # pylint: disable=too-many-instance-attributes
             return
         self.current_dat_file = path_to_file
         try:
-            self.patterns = self.pattern_dumper.dump_pattern([path_to_file])
+            self.patterns = dump_pattern(path_to_file, printer=self.msg.show_info)
             list_box_model = []
             for p in self.patterns:
                 list_box_model.append(self.__get_pattern_title(p))
@@ -240,8 +238,8 @@ class KnittingApp(tkinter.Tk): # pylint: disable=too-many-instance-attributes
         self.pattern_canvas.clear()
         self.patternTitle.caption.set(self.__get_pattern_title(pattern))
         if pattern:
-            result = self.pattern_dumper.dump_pattern(
-                [self.current_dat_file, str(pattern["number"])]
+            result = dump_pattern(
+                self.current_dat_file, str(pattern["number"]), printer=self.msg.show_info
             )
             if result:
                 self.__print_pattern_on_canvas(result[0])
@@ -368,8 +366,8 @@ class KnittingApp(tkinter.Tk): # pylint: disable=too-many-instance-attributes
             self.msg.show_info(
                 f"Saving pattern number {pattern_number} as bmp file {file_path}"
             )
-            result = self.pattern_dumper.dump_pattern(
-                [self.current_dat_file, str(pattern_number)]
+            result = dump_pattern(
+                self.current_dat_file, str(pattern_number), printer=self.msg.show_info
             )
             pattern = result[0]
             pattern_height = len(pattern)

@@ -11,7 +11,7 @@ from PIL import Image
 from pddemulate.drive import PDDemulator
 from pddemulate.listener import PDDEmulatorListener
 from pattern.dump import dump_pattern
-from pattern.insert import PatternInserter
+from pattern.insert import insert_pattern
 
 from app.gui.gui import ExtendedCanvas, Gui
 from app.tkapp.config import Config
@@ -43,8 +43,6 @@ class KnittingApp(tkinter.Tk): # pylint: disable=too-many-instance-attributes
         self.emu.listeners.append(PDDListener(self))
         self.__set_emulator_started(False)
 
-        self.pattern_inserter = PatternInserter(self.msg.show_info)
-        self.pattern_inserter.print_error_callback = self.msg.show_error
         self.after_idle(self.reload_pattern_file)
 
     def emu_button_clicked(self) -> None:
@@ -392,8 +390,8 @@ class KnittingApp(tkinter.Tk): # pylint: disable=too-many-instance-attributes
             f"Inserting dat file {bitmap_file} to pattern number {pattern_number}"
         )
         old_brother_file = self.current_dat_file
-        self.pattern_inserter.insert_pattern(
-            old_brother_file, pattern_number, bitmap_file, old_brother_file
+        insert_pattern(
+            old_brother_file, pattern_number, bitmap_file, old_brother_file, self.msg.show_info
         )
         self.reload_pattern_file()
 

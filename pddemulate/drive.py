@@ -319,7 +319,7 @@ class PDDemulator:
         # Stay in FDC mode
 
     def __write_id_section(
-        self, with_check=False # pylint: disable=unused-argument
+        self, with_check=False  # pylint: disable=unused-argument
     ) -> None:
         # Followed by physical sector number 0-79, defaults to 0
         # When received, send result status, if not error, wait
@@ -350,7 +350,7 @@ class PDDemulator:
             self.__handle_fdc_mode_request(more)
 
     def __write_logical_sector(
-        self, with_check=False # pylint: disable=unused-argument
+        self, with_check=False  # pylint: disable=unused-argument
     ) -> None:
         info = self.__read_fdd_request()
         physical_sector, logical_sector = (

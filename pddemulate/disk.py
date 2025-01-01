@@ -68,7 +68,7 @@ class Disk:
         self.sectors[psn].write(indata)
         if psn % 2:
             filenum = ((psn - 1) / 2) + 1
-            filename = f"file-{filenum}.dat" % filenum
+            filename = f"file-{filenum}.dat"
             # we wrote an odd sector, so create the
             # associated file
             fn1 = os.path.join(self.filespath, f"{psn - 1}.dat")

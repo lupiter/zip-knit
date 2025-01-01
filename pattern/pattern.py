@@ -8,6 +8,7 @@ class PatternMetadata:
     memo_offset: int
     pattern_offset: int
     pattern_end_offset: int
+    data: bytes
 
     def __init__(  # pylint: disable=too-many-arguments
         self,
@@ -17,7 +18,8 @@ class PatternMetadata:
         rows: int,
         memo_offset: int,
         pattern_offset: int,
-        pattern_end_offset: int
+        pattern_end_offset: int,
+        data: bytes
     ) -> None:
         self.number = number
         self.stitches = stitches
@@ -25,6 +27,7 @@ class PatternMetadata:
         self.memo_offset = memo_offset
         self.pattern_offset = pattern_offset
         self.pattern_end_offset = pattern_end_offset
+        self.data = data
 
     def __eq__(self, other):
         return (
@@ -50,44 +53,47 @@ class PatternMetadata:
                 rows = rows - 1
         return bytes(memos)
 
-    def get_data(self, data: bytes) -> list[bytes]:
+    @staticmethod
+    def get_data(stitches: int, rows: int, data: bytes, pattern_offset: int) -> list[bytes]:
         pattern = []
 
         # print 'patoff = 0x%04X' % patoff
         # print 'rows = ', rows
         # print 'stitches = ', stitches
-        for i in range(0, self.rows):
-            arow = self.__get_row_data(data, i)
+        for i in range(0, rows):
+            arow = PatternMetadata.__get_row_data(stitches, data, i, pattern_offset)
             # print arow
             pattern.append(arow)
         return pattern
 
-    def __get_row_data(self, data: bytes, rownumber: int) -> bytes:
+    @staticmethod
+    def __get_row_data(stitches: int, data: bytes, rownumber: int, pattern_offset: int) -> bytes:
         row = []
-        nibspr = nibbles_per_row(self.stitches)
+        nibspr = nibbles_per_row(stitches)
         startnib = int(nibspr * rownumber)
         endnib = int(startnib + nibspr)
-        stitches = self.stitches
+        stitch = stitches
 
         for i in range(startnib, endnib, 1):
-            nib = self.__get_indexed_nibble(data, i)
+            nib = PatternMetadata.__get_indexed_nibble(data, i, pattern_offset)
             row.append(nib & 0x01)
-            stitches = stitches - 1
-            if stitches:
+            stitch = stitch - 1
+            if stitch:
                 row.append((nib & 0x02) >> 1)
-                stitches = stitches - 1
-            if stitches:
+                stitch = stitch - 1
+            if stitch:
                 row.append((nib & 0x04) >> 2)
-                stitches = stitches - 1
-            if stitches:
+                stitch = stitch - 1
+            if stitch:
                 row.append((nib & 0x08) >> 3)
-                stitches = stitches - 1
+                stitch = stitch - 1
         return bytes(row)
 
-    def __get_indexed_nibble(self, data: bytes, nibble: int) -> int:
+    @staticmethod
+    def __get_indexed_nibble(data: bytes, nibble: int, pattern_offset: int) -> int:
         # nibbles is zero based
         byte_data = int(nibble / 2)
-        m, l = nibbles(data[self.pattern_offset - byte_data])
+        m, l = nibbles(data[pattern_offset - byte_data])
         if nibble % 2:
             return m
         return l

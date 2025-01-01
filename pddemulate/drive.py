@@ -365,7 +365,7 @@ class PDDemulator:
         try:
             self.disk.write_sector(physical_sector, logical_sector, indata)
             for l in self.listeners:
-                l.dataReceived(self.disk.last_dat_file_path)
+                l.data_received(self.disk.last_dat_file_path)
             print("Saved data in dat file: ", self.disk.last_dat_file_path)
         except:
             print(f"Failed to write data for sector {physical_sector}, quitting")

@@ -20,10 +20,10 @@ class Messages:
             print(msg)
             mb.showinfo("Info:", str(msg))
 
-    def show_info(self, msg):
+    def show_info(self, msg, end=None):
         if self.display_messages:
             self.clear()
-            print(msg)
+            print(msg, end=end)
             self.app.infoLabel.caption.set("Info: " + str(msg))
 
     def show_debug(self, msg):

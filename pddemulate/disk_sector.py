@@ -10,65 +10,67 @@ import os
 
 
 class DiskSector:
-    def __init__(self, fn):
-        self.sector_size = 1024
-        self.id_size = 12
-        self.data: bytes = b""
-        self.id: bytes = b""
-        # self.id = array('c')
+    sector_size = 1024
+    id_size = 12
+    data: bytes = b""
+    id: bytes = b""
 
-        dfn = fn + ".dat"
-        idfn = fn + ".id"
+    def __init__(self, file_name: str):
+        if not file_name:
+            raise IOError("File name must be provided")
+        
+        data_file_name = file_name + ".dat"
+        id_file_name = file_name + ".id"
 
         try:
             try:
-                self.df = open(dfn, "rb+")
+                self.data_file = open(data_file_name, "rb+")
             except IOError:
-                self.df = open(dfn, "wb")  # pylint: disable=consider-using-with
+                self.data_file = open(data_file_name, "wb")  # pylint: disable=consider-using-with
 
             try:
-                self.idf = open(idfn, "rb+")
+                self.id_file = open(id_file_name, "rb+")
             except IOError:
-                self.idf = open(idfn, "wb")  # pylint: disable=consider-using-with
+                self.id_file = open(id_file_name, "wb")  # pylint: disable=consider-using-with
 
-            dfs = os.path.getsize(dfn)
-            idfs = os.path.getsize(idfn)
+            data_file_size = os.path.getsize(data_file_name)
+            id_file_size = os.path.getsize(id_file_name)
 
         except:
-            print(f"Unable to open files using base name <{fn}>")
+            print(f"Unable to open files using base name <{file_name}>")
             raise
 
         try:
-            if dfs == 0:
+            if data_file_size == 0:
                 # New or empty file
                 self.data = bytearray(self.sector_size)
-                self.write_d_file()
-            elif dfs == self.sector_size:
+                self.write_data_file()
+            elif data_file_size == self.sector_size:
                 # Existing file
-                self.data = self.df.read(self.sector_size)
+                self.data = self.data_file.read(self.sector_size)
             else:
-                print(f"Found a data file <{dfn}> with the wrong size")
+                print(f"Found a data file <{data_file_name}> with the wrong size")
                 raise IOError
         except:
-            print(f"Unable to handle data file <{fn}>")
+            print(f"Unable to handle data file <{file_name}>")
             raise
 
         try:
-            if idfs == 0:
+            if id_file_size == 0:
                 # New or empty file
                 self.id = bytearray(self.id_size)
                 self.write_id_file()
-            elif idfs == self.id_size:
+            elif id_file_size == self.id_size:
                 # Existing file
-                self.id = self.idf.read(self.id_size)
+                self.id = self.id_file.read(self.id_size)
             else:
                 print(
-                    f"Found an ID file <{idfn}> with the wrong size,"
-                    + f" is {idfs} should be {self.id_size}"
+                    f"Found an ID file <{id_file_name}> with the wrong size,"
+                    + f" is {id_file_size} should be {self.id_size}"
                 )
                 raise IOError
         except:
-            print(f"Unable to handle id file <{fn}>")
+            print(f"Unable to handle id file <{file_name}>")
             raise
 
     def __del__(self):
@@ -76,19 +78,19 @@ class DiskSector:
 
     def format(self):
         self.data = bytearray(self.sector_size)
-        self.write_d_file()
+        self.write_data_file()
         self.id = bytearray(self.id_size)
         self.write_id_file()
 
-    def write_d_file(self) -> None:
-        self.df.seek(0)
-        self.df.write(self.data)
-        self.df.flush()
+    def write_data_file(self) -> None:
+        self.data_file.seek(0)
+        self.data_file.write(self.data)
+        self.data_file.flush()
 
     def write_id_file(self) -> None:
-        self.idf.seek(0)
-        self.idf.write(self.id)
-        self.idf.flush()
+        self.id_file.seek(0)
+        self.id_file.write(self.id)
+        self.id_file.flush()
 
     def read(self, length: int) -> bytes:
         if length != self.sector_size:
@@ -103,7 +105,7 @@ class DiskSector:
             )
             raise IOError
         self.data = indata
-        self.write_d_file()
+        self.write_data_file()
 
     def get_sector_id(self) -> bytes:
         return self.id

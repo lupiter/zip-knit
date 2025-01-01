@@ -15,3 +15,5 @@ test-data
 
 # virtual env
 venv/*
+
+.DS_Store

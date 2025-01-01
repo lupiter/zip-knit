@@ -158,26 +158,26 @@ class BrotherFile:  # pylint: disable=too-many-public-methods
                 pptr = pptr - bytes_per_pattern_and_memo(stitches, rows)
                 if self.verbose:
                     print(("Ending offset ", hex(pptr)))
-                patlist.append(
-                    PatternMetadata(
-                        number=patno,
-                        stitches=stitches,
-                        rows=rows,
-                        memo_offset=memoff,
-                        pattern_offset=patoff,
-                        pattern_end_offset=pptr,
-                    )
+                pats = PatternMetadata(
+                    number=patno,
+                    stitches=stitches,
+                    rows=rows,
+                    memo_offset=memoff,
+                    pattern_offset=patoff,
+                    pattern_end_offset=pptr,
+                    data=PatternMetadata.get_data(stitches, rows, self.data, patoff),
                 )
+                patlist.append(pats)
             else:
                 break
         return patlist
 
-    def get_pattern_data(self, pattern_number: int) -> list[bytes]:
-        """
-        Return an array containing the pattern
-        information for a pattern.
-        """
-        return self.get_pattern(pattern_number).get_data(self.data)
+    # def get_pattern_data(self, pattern_number: int) -> list[bytes]:
+    #     """
+    #     Return an array containing the pattern
+    #     information for a pattern.
+    #     """
+    #     return self.get_pattern(pattern_number).get_data(self.data)
 
     # def motif_data(self) -> list[dict]:
     #     motiflist = []

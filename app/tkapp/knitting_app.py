@@ -10,6 +10,7 @@ from PIL import Image
 
 from pddemulate.drive import PDDemulator
 from pddemulate.listener import PDDEmulatorListener
+from pattern.pattern import PatternMetadata
 from pattern.dump import dump_pattern
 from pattern.insert import insert_pattern
 
@@ -233,7 +234,7 @@ class KnittingApp(tkinter.Tk):  # pylint: disable=too-many-instance-attributes
         self.patternListBox.selection_set(index)
         self.__display_pattern(self.patterns[index])
 
-    def __display_pattern(self, pattern=None) -> None:
+    def __display_pattern(self, pattern: PatternMetadata = None) -> None:
         if not pattern:
             pattern = self.pattern
         self.pattern_canvas.clear()
@@ -241,29 +242,21 @@ class KnittingApp(tkinter.Tk):  # pylint: disable=too-many-instance-attributes
         if pattern:
             result = dump_pattern(
                 self.current_dat_file,
-                str(pattern["number"]),
+                pattern.number,
                 printer=self.msg.show_info,
             )
             if result:
                 self.__print_pattern_on_canvas(result[0])
         self.pattern = pattern
 
-    def __get_pattern_title(self, pattern) -> str:
+    def __get_pattern_title(self, pattern: PatternMetadata) -> str:
         p = pattern
         if p:
-            return (
-                "Pattern no: "
-                + str(p["number"])
-                + " (rows x stitches: "
-                + str(p["rows"])
-                + " x "
-                + str(p["stitches"])
-                + ")"
-            )
+            return f"Pattern no: {str(p.number)} (rows x stitches: {str(p.rows)} x {str(p.stitches)})"
         return "No pattern"
 
     def __print_pattern_on_canvas(  # pylint: disable=too-many-locals
-        self, pattern
+        self, pattern: PatternMetadata
     ) -> None:
         #        pattern = []
         #        for x in range(8):
@@ -271,8 +264,10 @@ class KnittingApp(tkinter.Tk):  # pylint: disable=too-many-instance-attributes
         #            for y in range(13):
         #                row.append((y % 2 + x % 2) % 2)
         #            pattern.append(row)
-        pattern_height = len(pattern)
-        pattern_width = len(pattern[0])
+        pattern_height = pattern.rows
+        pattern_width = pattern.stitches
+        if pattern_width <= 0 or pattern_height <= 0:
+            return
         margin = Point(10, 10)
         bit_width = (self.pattern_canvas.get_width() - margin.x) / (pattern_width)
         bit_height = (self.pattern_canvas.get_height() - margin.y) / (pattern_height)
@@ -295,14 +290,14 @@ class KnittingApp(tkinter.Tk):  # pylint: disable=too-many-instance-attributes
                 )
 
     def __print_pattern_body(
-        self, pattern, position: Point, bit_width, bit_height
+        self, pattern: PatternMetadata, position: Point, bit_width, bit_height
     ) -> None:
-        pattern_height = len(pattern)
-        pattern_width = len(pattern[0])
+        pattern_height = pattern.rows
+        pattern_width = pattern.stitches
         self.pattern_canvas.clear()
         for row in range(pattern_height):
             for stitch in range(pattern_width):
-                if (pattern[row][stitch]) == 1:
+                if (pattern.data[row][stitch]) == 1:
                     fill = "black"
                     border = "white"
                     # border=fill
@@ -358,7 +353,7 @@ class KnittingApp(tkinter.Tk):  # pylint: disable=too-many-instance-attributes
             title="Choose bitmap file to insert...",
         )
         if len(file_path) > 0:
-            self.__insert_bitmap(file_path, pattern["number"])
+            self.__insert_bitmap(file_path, pattern.number)
 
     def export_bitmap_button_clicked(self) -> None:
         sel = self.patternListBox.curselection()
@@ -371,7 +366,7 @@ class KnittingApp(tkinter.Tk):  # pylint: disable=too-many-instance-attributes
             filetypes=[("2-color Bitmap", "*.bmp")], title="Save as a bitmap file..."
         )
         if len(file_path) > 0:
-            pattern_number = pattern["number"]
+            pattern_number = pattern.number
             self.msg.show_info(
                 f"Saving pattern number {pattern_number} as bmp file {file_path}"
             )

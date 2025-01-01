@@ -30,9 +30,10 @@ def dump_pattern(
     printer(f"Searching for pattern number {pattern_number}")
     pats = bf.get_pattern(pattern_number)
     if pats is None:
+        return None
         raise PatternNotFoundException(pattern_number)
     printer(f"{pats.stitches} Stitches, {pats.rows} Rows")
-    return [bf.get_pattern_data(pattern_number)]
+    return [pats]
 
 
 def __pattern_print(
@@ -49,7 +50,7 @@ def __pattern_print(
         bytenum = i * 7
 
         pattused = bf.get_indexed_byte(bytenum)
-        printer("\t", hex(bytenum), ": ", hex(pattused), end=" ")
+        printer(f"\t{hex(bytenum)}:{hex(pattused)}", end=" ")
         if pattused == 1:
             printer("\t(used)")
         else:

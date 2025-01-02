@@ -3,7 +3,8 @@
 # meat and potatos here
 
 import sys
-from pddemulate.drive import PDDemulator
+# from pddemulate.drive import PDDemulator
+from pddemulate.process import DiskProcess
 
 VERSION = "2.0"
 
@@ -15,15 +16,20 @@ if __name__ == "__main__":
         sys.exit()
 
     print("Preparing . . . Please Wait")
-    emu = PDDemulator(sys.argv[1])
+    
+    processor = DiskProcess(sys.argv[1], print)
+    # emu = PDDemulator(sys.argv[1])
 
-    emu.open(cport=sys.argv[2])
+    processor.start(port=sys.argv[2])
+    # emu.open(cport=sys.argv[2])
 
     print("Emulator Ready!")
     try:
-        while True:
-            emu.handle_requests()
+        processor.queue_check()
+        # while True:
+        #     emu.handle_requests()
     except KeyboardInterrupt:
         pass
 
-    emu.close()
+    processor.exit()
+    # emu.close()

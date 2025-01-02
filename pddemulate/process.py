@@ -25,7 +25,7 @@ def run_disk(port: Queue, responses: Queue, imgdir: str) -> None:
         except Empty:
             changed = False
         if changed:
-            if emu.isOpen():
+            if emu.is_open():
                 emu.close()
             emu.open(device)
         if device is not None:
@@ -72,7 +72,7 @@ class DiskProcess:
         print("exit")
         in_queue.close()
         out_queue.close()
-        if process.is_alive():
+        while process.is_alive():
             process.terminate()
         process.close()
 
@@ -94,4 +94,4 @@ class DiskProcess:
                 message = self.responses.get(block=False)
                 self.callback(message)
             except Empty:
-                return
+                continue

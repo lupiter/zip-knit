@@ -30,6 +30,7 @@ def dump_pattern(
     printer(f"Searching for pattern number {pattern_number}")
     pats = bf.get_pattern(pattern_number)
     if pats is None:
+        printer(f"Pattern not found {pattern_number}")
         return None
         raise PatternNotFoundException(pattern_number)
     printer(f"{pats.stitches} Stitches, {pats.rows} Rows")
@@ -45,18 +46,18 @@ def __pattern_print(
 
     # first dump the 99 'pattern id' blocks
     for i in range(99):
-        printer(f"program entry {i}")
         # each block is 7 bytes
         bytenum = i * 7
 
         pattused = bf.get_indexed_byte(bytenum)
-        printer(f"\t{hex(bytenum)}:{hex(pattused)}", end=" ")
         if pattused == 1:
+            printer(f"program entry {i}")
+            printer(f"\t{hex(bytenum)}:{hex(pattused)}", end=" ")
             printer("\t(used)")
         else:
-            printer("\t(unused)")
-            # printer "\t-skipped-"
-            # continue
+            # printer("\t(unused)")
+            # printer("\t-skipped-")
+            continue
         bytenum += 1
 
         unk1 = bf.get_indexed_byte(bytenum)
@@ -96,7 +97,7 @@ def __pattern_print(
         )
         bytenum += 1
 
-    printer("============================================")
+    printer("================================================")
     printer("Program memory grows -up-")
     # now we're onto data data
 
@@ -168,12 +169,11 @@ class PatternNotFoundException(Exception):
 
 def main():
     try:
-        # print sys.argv
-        out = dump_pattern(sys.argv[1:])
+        out = dump_pattern(sys.argv[1])
         if len(out) > 1:
             print("Pattern   Stitches   Rows")
             for pat in out:
-                print(f'  {pat["number"]}       {pat["stitches"]}      {pat["rows"]}')
+                print(f'  {pat.number}       {pat.stitches}      {pat.rows}')
         elif len(out) > 0:
             for row in out:
                 for stitch in row:

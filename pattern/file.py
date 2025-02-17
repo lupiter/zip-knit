@@ -80,10 +80,10 @@ class BrotherFile:  # pylint: disable=too-many-public-methods
     def get_indexed_nibble(self, offset: int, nibble: int) -> int:
         # nibbles is zero based
         byte_data = int(nibble / 2)
-        m, l = nibbles(self.data[offset - byte_data])
+        msn, lsn = nibbles(self.data[offset - byte_data])
         if nibble % 2:
-            return m
-        return l
+            return msn
+        return lsn
 
     def get_pattern(self, pattern_number: int) -> PatternMetadata | None:
         """

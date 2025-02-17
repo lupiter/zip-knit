@@ -93,7 +93,7 @@ class PatternMetadata:
     def __get_indexed_nibble(data: bytes, nibble: int, pattern_offset: int) -> int:
         # nibbles is zero based
         byte_data = int(nibble / 2)
-        m, l = nibbles(data[pattern_offset - byte_data])
+        msn, lsn = nibbles(data[pattern_offset - byte_data])
         if nibble % 2:
-            return m
-        return l
+            return msn
+        return lsn

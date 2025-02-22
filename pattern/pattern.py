@@ -57,12 +57,8 @@ class PatternMetadata:
     def get_data(stitches: int, rows: int, data: bytes, pattern_offset: int) -> list[bytes]:
         pattern = []
 
-        # print 'patoff = 0x%04X' % patoff
-        # print 'rows = ', rows
-        # print 'stitches = ', stitches
         for i in range(0, rows):
             arow = PatternMetadata.__get_row_data(stitches, data, i, pattern_offset)
-            # print arow
             pattern.append(arow)
         return pattern
 

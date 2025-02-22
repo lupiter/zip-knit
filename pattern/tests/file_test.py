@@ -85,8 +85,8 @@ class TestFile(unittest.TestCase):
 
     def test_get_pattern_data(self):
         file = BrotherFile(SAMPLE)
-        data = file.get_pattern_data(0)
+        data = file.get_pattern(0).data
         self.assertEqual(len(data), 0)
-        data = file.get_pattern_data(34)
+        data = file.get_pattern(34).data
         self.assertEqual(len(data), 50)
         self.assertEqual(len(data[0]), 10)

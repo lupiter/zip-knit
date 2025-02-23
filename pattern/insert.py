@@ -137,8 +137,8 @@ def insert_pattern(
         bf.set_indexed_byte(endaddr, 0)
         endaddr -= 1
 
-    for i in enumerate(pattmem):
-        bf.set_indexed_byte(endaddr, pattmem[i])
+    for i, value in enumerate(pattmem):
+        bf.set_indexed_byte(endaddr, value)
         endaddr -= 1
 
     # push the data to a file

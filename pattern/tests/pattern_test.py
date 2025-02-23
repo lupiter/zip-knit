@@ -14,7 +14,7 @@ class TestPattern(unittest.TestCase):
             pattern_end_offset=32,
             data=list(range(32))
         )
-        memo = pattern.get_memo(list(range(32)))
+        memo = pattern.get_memo()
         self.assertEqual(memo, b"\x08")
 
     def test_get_data(self):

@@ -245,7 +245,7 @@ class KnittingApp(tkinter.Tk):  # pylint: disable=too-many-instance-attributes
                 pattern.number,
                 printer=self.msg.show_info,
             )
-            if result:
+            if result and len(result) > 0:
                 self.__print_pattern_on_canvas(result[0])
         self.pattern = pattern
 
@@ -296,22 +296,21 @@ class KnittingApp(tkinter.Tk):  # pylint: disable=too-many-instance-attributes
         pattern_width = pattern.stitches
         self.pattern_canvas.clear()
         for row in range(pattern_height):
+            # Get row data as a list of 1s and 0s
+            row_data = PatternMetadata.get_row(pattern.data, row, pattern_width)
             for stitch in range(pattern_width):
-                if (pattern.data[row][stitch]) == 1:
+                if row_data[stitch] == 1:
                     fill = "black"
                     border = "white"
-                    # border=fill
                 else:
                     fill = "white"
                     border = "black"
-                    # border=fill
-                row = pattern_height - row - 1
-                # stitch = patternWidth - stitch - 1
+                display_row = pattern_height - row - 1
                 self.pattern_canvas.create_rectangle(
                     position.x + stitch * bit_width,
-                    position.y + row * bit_height,
+                    position.y + display_row * bit_height,
                     position.x + (stitch + 1) * bit_width,
-                    position.y + (row + 1) * bit_height,
+                    position.y + (display_row + 1) * bit_height,
                     width=1,
                     fill=fill,
                     outline=border,

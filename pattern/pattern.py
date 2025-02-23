@@ -37,15 +37,16 @@ class PatternMetadata:
             and self.memo_offset == other.memo_offset
             and self.pattern_offset == other.pattern_offset
             and self.pattern_end_offset == other.pattern_end_offset
+            and self.data == other.data
         )
 
-    def get_memo(self, data: bytes) -> bytes:
+    def get_memo(self) -> bytes:
         memos = []
         rows = self.rows
         memlen = int(roundeven(rows) / 2)
         # memo is padded to en even byte
         for i in range(self.memo_offset, self.memo_offset - memlen, -1):
-            msn, lsn = nibbles(data[i])
+            msn, lsn = nibbles(self.data[i])
             memos.append(lsn)
             rows = rows - 1
             if rows:
@@ -93,3 +94,14 @@ class PatternMetadata:
         if nibble % 2:
             return msn
         return lsn
+
+    @staticmethod
+    def get_row(data: bytes, row: int, stitches: int) -> list[int]:
+        """Get a single row of pattern data as a list of 1s and 0s."""
+        if not data:
+            return []
+        start_idx = row * stitches
+        end_idx = start_idx + stitches
+        if end_idx > len(data):
+            return []
+        return [data[i] for i in range(start_idx, end_idx)]

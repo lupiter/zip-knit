@@ -24,7 +24,9 @@ class Messages:
         if self.display_messages:
             self.clear()
             print(msg, end=end)
-            self.app.infoLabel.caption.set("Info: " + str(msg))
+            # Only try to set the label if infoLabel exists
+            if hasattr(self.app, 'infoLabel'):
+                self.app.infoLabel.caption.set("Info: " + str(msg))
 
     def show_debug(self, msg):
         if self.debug:
@@ -32,4 +34,5 @@ class Messages:
 
     def clear(self):
         if self.display_messages:
-            self.app.infoLabel.caption.set("")
+            if hasattr(self.app, 'infoLabel'):
+                self.app.infoLabel.caption.set("")

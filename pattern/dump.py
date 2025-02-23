@@ -31,7 +31,6 @@ def dump_pattern(
     pats = bf.get_pattern(pattern_number)
     if pats is None:
         printer(f"Pattern not found {pattern_number}")
-        return None
         raise PatternNotFoundException(pattern_number)
     printer(f"{pats.stitches} Stitches, {pats.rows} Rows")
     return [pats]
